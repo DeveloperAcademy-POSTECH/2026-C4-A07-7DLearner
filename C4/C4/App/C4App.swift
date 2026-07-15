@@ -14,14 +14,17 @@ struct C4App: App {
         let schema = Schema([
             Character.self,
             Experience.self,
-            Keyword.self
+            Keyword.self,
+            Attachment.self,
+            Episode.self
         ])
         let configuration = ModelConfiguration(schema: schema)
         
-        guard let container = try? ModelContainer(for: schema, configurations: configuration) else {
-            fatalError("ModelContainer failed")
+        do {
+            return try ModelContainer(for: schema, configurations: configuration)
+        } catch {
+            fatalError("ModelContainer failed: \(error)")
         }
-        return container
     }()
     
     var body: some Scene {

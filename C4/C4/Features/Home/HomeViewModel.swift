@@ -46,7 +46,7 @@ extension HomeViewModel {
 // MARK: - Experience 수정/삭제
 extension HomeViewModel {
     func toggleFavorite(_ experience: Experience) {
-        experience.isFavorite.toggle()
+        //
     }
     
     func deleteExperience(_ experience: Experience) {

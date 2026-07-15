@@ -11,38 +11,44 @@ import Foundation
 @Model
 final class Experience {
     
-    // MARK: 사용자 입력값
+    // MARK: 식별자
     var id: UUID
+    
+    // MARK: 사용자 입력값
     var title: String
     var periodStart: Date
     var periodEnd: Date
-    var mergedContext: String? // 첨부파일의 모든 내용을 합친 하나의 문자열
-    var experienceStatement: String // 사용자 자유 진술
+    var experienceStatement: String // 키워드 생성 시 입력 받는 '경험진술'
     
-    // MARK: AI 생성값
-    var myRole: String?
-    var teamSize: String?
-    var experienceDescription: String?
-    var problemContext: String?
-    var concernPoint: String?
-    var breakthrough: String?
-    var myAction: String?
-    var outcome: String?
-    @Relationship(inverse: \Keyword.experiences)
-    var keywords: [Keyword]? = []
+    // MARK: 관계
+    @Relationship(inverse: \Keyword.experiences) var keywords: [Keyword] = []
+    @Relationship(deleteRule: .cascade) var attachments: [Attachment] = []
+    @Relationship(deleteRule: .cascade) var episodes: [Episode] = []
     
-    // MARK: 메타데이터
-    var isFavorite: Bool
-    var createdAt: Date
-    
+    // MARK: 생성자
     init(title: String, periodStart: Date, periodEnd: Date, experienceStatement: String) {
         self.id = UUID()
         self.title = title
         self.periodStart = periodStart
         self.periodEnd = periodEnd
         self.experienceStatement = experienceStatement
-        self.isFavorite = false
-        self.createdAt = .now
     }
     
+}
+
+// MARK: - 유효성 검사
+extension Experience {
+    
+    // 기간 올바른지
+    var hasValidPeriod: Bool {
+        self.periodStart <= self.periodEnd
+    }
+    
+    // 저장 가능한지 (제목 + 기간 + 키워드)
+    var isReadyToSave: Bool {
+        !self.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        && self.hasValidPeriod
+        && !self.keywords.isEmpty
+        
+    }
 }
