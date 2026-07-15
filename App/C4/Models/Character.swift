@@ -22,10 +22,11 @@ final class Character {
     @Relationship(inverse: \Keyword.characters) var keywords: [Keyword] = []
     
     // MARK: 생성자
-    init(title: String, characterStatement: String) {
+    init(title: String, characterStatement: String, keywords: [Keyword]) {
         self.id = UUID()
         self.title = title
         self.characterStatement = characterStatement
+        self.keywords = keywords
     }
     
 }
@@ -36,7 +37,7 @@ extension Character {
     // 저장 가능한지 (제목 + 키워드)
     var isReadyToSave: Bool {
         !self.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        && !self.keywords.isEmpty
+        && !self.keywords.isEmpty // 생성자가 빈 배열을 받아오는 것에 대한 방지
     }
     
 }
