@@ -9,8 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct HomeView: View {
-    @Query(sort: \Experience.createdAt, order: .reverse)
-    private var experiences: [Experience]
+    @Query private var experiences: [Experience]
     private let viewModel: HomeViewModel
     
     init(viewModel: HomeViewModel) {
