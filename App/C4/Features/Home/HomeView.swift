@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct HomeView: View {
+    
     @Query private var experiences: [Experience]
     private let viewModel: HomeViewModel
     
@@ -17,6 +18,9 @@ struct HomeView: View {
     }
     
     var body: some View {
-        //
+        List(experiences) { experience in
+            Text(experience.title)
+        }
     }
+    
 }

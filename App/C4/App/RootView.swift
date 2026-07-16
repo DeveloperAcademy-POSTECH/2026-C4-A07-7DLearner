@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct RootView: View {
+    
     @Environment(\.modelContext) private var modelContext
     
     @State private var selection: SidebarItem? = .home
@@ -20,6 +21,7 @@ struct RootView: View {
             detailContent
         }
     }
+    
 }
 
 // MARK: - 사이드바
@@ -52,4 +54,5 @@ private extension RootView {
 
 #Preview {
     RootView()
+        .modelContainer(for: [Character.self, Experience.self, Keyword.self, Attachment.self, Episode.self], inMemory: true)
 }

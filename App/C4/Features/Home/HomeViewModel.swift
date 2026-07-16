@@ -11,45 +11,33 @@ import Foundation
 
 @Observable
 final class HomeViewModel {
-    // MARK: - SwiftData
-    private let modelContext: ModelContext
+    
+    private let context: ModelContext
+    
+    private let keywordRepository: KeywordRepository
+    private let experienceRepository: ExperienceRepository
     
     init(modelContext: ModelContext) {
-        self.modelContext = modelContext
-    }
-}
-
-// MARK: - Experience 생성
-extension HomeViewModel {
-    
-    func canSaveExperience(title: String, experienceStatement: String) -> Bool {
-        !title.isEmpty && !experienceStatement.isEmpty
+        self.context = modelContext
+        self.keywordRepository = KeywordRepository(context: modelContext)
+        self.experienceRepository = ExperienceRepository(context: modelContext)
     }
     
-    func createExperience(
-        title: String,
-        periodStart: Date,
-        periodEnd: Date,
-        experienceStatement: String
-    ) {
-        let experience = Experience(
+    func createExperience(title: String, periodStart: Date, periodEnd: Date, experienceStatement: String, keywordNames: [String]) {
+        let keywords = keywordNames.map { try! keywordRepository.findOrCreate(name: $0) }
+        let experience = experienceRepository.create(
             title: title,
             periodStart: periodStart,
             periodEnd: periodEnd,
             experienceStatement: experienceStatement
         )
-        
-        modelContext.insert(experience)
-    }
-}
-
-// MARK: - Experience 수정/삭제
-extension HomeViewModel {
-    func toggleFavorite(_ experience: Experience) {
-        //
+        experience.keywords = keywords
+        try? experienceRepository.context.save()
     }
     
     func deleteExperience(_ experience: Experience) {
-        modelContext.delete(experience)
+        experienceRepository.delete(experience)
+        try? experienceRepository.context.save()
     }
+    
 }
