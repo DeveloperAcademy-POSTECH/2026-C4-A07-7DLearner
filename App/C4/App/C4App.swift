@@ -10,13 +10,15 @@ import SwiftData
 
 @main
 struct C4App: App {
+    
+    // MARK: SwiftData Container 생성
     var container: ModelContainer = {
         let schema = Schema([
-            Character.self,
-            Experience.self,
-            Keyword.self,
             Attachment.self,
-            Episode.self
+            Character.self,
+            Episode.self,
+            Experience.self,
+            Keyword.self
         ])
         let configuration = ModelConfiguration(schema: schema)
         
@@ -27,10 +29,12 @@ struct C4App: App {
         }
     }()
     
+    // MARK: App의 진입점 설정, Container 주입
     var body: some Scene {
         WindowGroup {
             RootView()
         }
         .modelContainer(container)
     }
+    
 }
