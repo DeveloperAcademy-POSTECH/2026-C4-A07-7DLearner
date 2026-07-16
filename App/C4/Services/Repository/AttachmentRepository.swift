@@ -27,7 +27,7 @@ struct AttachmentRepository {
     
     // MARK: 삭제 - 실제 파일 사본도 같이 지움
     func delete(_ attachment: Attachment) {
-        try? FileManager.default.removeItem(at: attachment.storedFileURL)
+        try? FileStorageService.delete(storedFileName: attachment.storedFileName)
         context.delete(attachment)
     }
     
