@@ -29,7 +29,7 @@ private extension RootView {
             Label(item.rawValue, systemImage: item.icon)
                 .tag(item)
         }
-        .navigationSplitViewColumnWidth(min: 130, ideal: 180)
+        .navigationSplitViewColumnWidth(min: 130, ideal: 180, max: 300)
     }
 }
 
@@ -41,9 +41,9 @@ private extension RootView {
         case .home:
             HomeView(viewModel: HomeViewModel(modelContext: modelContext))
         case .experience:
-            Text("경험 화면")
+            ExperienceView(modelContext: modelContext)
         case .character:
-            Text("캐릭터 화며")
+            Text("캐릭터 화면")
         case .none:
             Text("사이드바에서 항목을 선택하세요")
         }
