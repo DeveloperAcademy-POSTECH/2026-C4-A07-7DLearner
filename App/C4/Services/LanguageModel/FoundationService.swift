@@ -28,7 +28,14 @@ struct FoundationModelService: EpisodeGenerating {
 // MARK: - response parsing
 private extension FoundationModelService {
     static func parse(_ responseText: String) throws -> [EpisodeGenerationOutput] {
-        guard let data = responseText.data(using: .utf8) else {
+        
+        // FoundationModel이 응답을 마크다운 코드블록(```json [] ```)으로 감싸서 보내므로 제거 필요
+        let cleaned = responseText
+            .replacingOccurrences(of: "```json", with: "")
+            .replacingOccurrences(of: "```", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard let data = cleaned.data(using: .utf8) else {
             throw FoundationModelError.invalidResponseEncoding
         }
         
@@ -37,6 +44,7 @@ private extension FoundationModelService {
         } catch {
             throw FoundationModelError.decodingFailed(rawResponse: responseText, underlying: error)
         }
+        
     }
 }
 
