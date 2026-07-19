@@ -27,6 +27,18 @@ struct HomeView: View {
                 isFileImporting = true
             }
             
+            Button("Claude API 테스트") {
+                Task {
+                    do {
+                        let service = ClaudeService()
+                        let response = try await service.testConnection()
+                        print("✅ 응답: \(response)")
+                    } catch {
+                        print("❌ 에러: \(error)")
+                    }
+                }
+            }
+            
             ForEach(experiences) { experience in
                 Section(experience.title) {
                     ForEach(experience.attachments) { attachment in
