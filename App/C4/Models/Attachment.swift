@@ -52,10 +52,7 @@ extension Attachment {
     
     // 샌드박스 안 파일 사본의 전체 경로
     var storedFileURL: URL {
-        FileManager.default
-            .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("Attachments", isDirectory: true)
-            .appendingPathComponent(self.storedFileName)
+        FileStorageService.url(for: self.storedFileName)
     }
     
 }
