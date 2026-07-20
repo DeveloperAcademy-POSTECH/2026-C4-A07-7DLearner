@@ -28,7 +28,6 @@ final class CharacterViewModel {
     var draftEpisodes: [Episode] = []
     
     // MARK: - Character State
-    var characters: [Character] = []
     var selectedCharacter: Character?
     var allKeywords: [Keyword] = []
     
@@ -65,8 +64,6 @@ final class CharacterViewModel {
         self.characterRepository = CharacterRepository(context: modelContext)
         self.keywordRepository = KeywordRepository(context: modelContext)
         self.episodeRepository = EpisodeRepository(context: modelContext)
-        
-        fetchCharacters()
     }
     
     // MARK: Functions
@@ -83,17 +80,7 @@ final class CharacterViewModel {
         isEditingDraft = false
         fetchAllKeywords()
     }
-    
-    // 저장된 전체 Character 조회
-    func fetchCharacters() {
-        do {
-            characters = try characterRepository.fetchAll()
-        }
-        catch {
-            print("Characters 조회 실패: \(error)")
-        }
-    }
-    
+        
     // Detail 화면에 표시할 Character 선택
     func selectCharacter(_ character: Character) {
         selectedCharacter = character
@@ -155,7 +142,6 @@ final class CharacterViewModel {
             _ = characterRepository.create(title: draftTitle, characterStatement: draftCharacterStatement, keywords: draftKeywords)
             do {
                 try context.save()
-                fetchCharacters()
                 currentInspectorScreen = nil
                 isEditingDraft = false
             }
