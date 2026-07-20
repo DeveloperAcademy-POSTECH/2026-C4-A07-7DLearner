@@ -45,7 +45,7 @@ private extension RootView {
         case .experience:
             Text("경험 화면")
         case .character:
-            Text("캐릭터 화며")
+            CharacterView(viewModel: CharacterViewModel(modelContext: modelContext))
         case .none:
             Text("사이드바에서 항목을 선택하세요")
         }
