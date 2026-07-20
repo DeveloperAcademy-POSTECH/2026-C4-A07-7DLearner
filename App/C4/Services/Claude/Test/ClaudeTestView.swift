@@ -13,14 +13,14 @@ internal import UniformTypeIdentifiers
 struct ClaudeTestView: View {
     
     @Query(sort: \Experience.periodStart, order: .reverse) private var experiences: [Experience]
-    private let viewModel: HomeViewModel
+    private let viewModel: ClaudeTestViewModel
     
         // MARK: - 화면 상태
     @State private var isShowingCreateSheet = false
     @State private var isFileImporting = false
     @State private var attachTarget: Experience?
     
-    init(viewModel: HomeViewModel) {
+    init(viewModel: ClaudeTestViewModel) {
         self.viewModel = viewModel
     }
     
@@ -171,7 +171,7 @@ private struct EpisodeCard: View {
 
     // MARK: - 경험 생성 시트
 private struct CreateExperienceSheet: View {
-    let viewModel: HomeViewModel
+    let viewModel: ClaudeTestViewModel
     @Environment(\.dismiss) private var dismiss
     
         // MARK: 입력 폼 상태
