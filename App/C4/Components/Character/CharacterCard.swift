@@ -44,16 +44,16 @@ struct CharacterCard: View {
                 HStack(spacing: 4) {
                     ForEach(displayedKeywords, id: \.id) { keyword in
                         if keyword.name.count > 3 {
-                            KeywordTag(text: String(keyword.name.prefix(3)) + "...")
+                            KeywordTag(text: String(keyword.name.prefix(3)) + "...", style: .selected)
                         }
                         else {
-                            KeywordTag(text: keyword.name)
+                            KeywordTag(text: keyword.name, style: .selected)
                         }
                     }
                     
                     if let keywordLimit,
                        character.keywords.count > keywordLimit {
-                        KeywordTag(text: "+\(character.keywords.count - keywordLimit)")
+                        KeywordTag(text: "+\(character.keywords.count - keywordLimit)", style: .selected)
                     }
                 }
                 

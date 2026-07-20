@@ -1,3 +1,10 @@
+//
+//  CharacterViewModel.swift
+//  C4
+//
+//  Created by jiwon hong on 7/20/26.
+//
+
 import Foundation
 import SwiftData
 import Observation
