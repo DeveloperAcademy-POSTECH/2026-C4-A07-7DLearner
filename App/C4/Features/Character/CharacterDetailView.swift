@@ -8,7 +8,7 @@ struct CharacterDetailView: View {
     @Bindable var viewModel: CharacterViewModel
     
     // MARK: Properties
-    private let episodeColumns = [GridItem(.adaptive(minimum:232), spacing: 8, alignment: .leading)]
+    private let episodeColumns = [GridItem(.adaptive(minimum:232), spacing: 8, alignment: .top)]
     
     // MARK: Body
     var body: some View {

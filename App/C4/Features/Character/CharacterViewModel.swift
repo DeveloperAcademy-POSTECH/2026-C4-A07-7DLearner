@@ -145,7 +145,7 @@ final class CharacterViewModel {
     // Character 저장 및 생성
     func createCharacter() {
         if isDraftReadyToSave {
-            characterRepository.create(title: draftTitle, characterStatement: draftCharacterStatement, keywords: draftKeywords)
+            _ = characterRepository.create(title: draftTitle, characterStatement: draftCharacterStatement, keywords: draftKeywords)
             do {
                 try context.save()
                 fetchCharacters()
