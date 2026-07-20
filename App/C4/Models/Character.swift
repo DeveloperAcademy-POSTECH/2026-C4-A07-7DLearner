@@ -1,10 +1,3 @@
-//
-//  Character.swift
-//  C4
-//
-//  Created by YOOJUN PARK on 7/13/26.
-//
-
 import SwiftData
 import Foundation
 
@@ -38,6 +31,16 @@ extension Character {
     var isReadyToSave: Bool {
         !self.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         && !self.keywords.isEmpty // 생성자가 빈 배열을 받아오는 것에 대한 방지
+    }
+    
+}
+
+// MARK: - 파생 데이터 조회
+extension Character {
+    
+    // 이 캐릭터가 가진 키워드들에 포함된 모든 에피소드 조회
+    var episodes: [Episode] {
+        self.keywords.flatMap { $0.episodes }
     }
     
 }
