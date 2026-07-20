@@ -7,31 +7,37 @@
 
 import Foundation
 
+    // MARK: - Claude API 클라이언트 (핵심 설정)
 final class ClaudeService {
     private let apiKey: String
     private let endpoint = URL(string: "https://api.anthropic.com/v1/messages")!
-    private let model = "claude-sonnet-4-6"
-
+    private let model = "claude-sonnet-5"
+    
     init() {
         self.apiKey = Secrets.claudeAPIKey
     }
+}
+
+    // MARK: - 텍스트 요청 / 응답 처리
+extension ClaudeService {
     
-    func testConnection() async throws -> String {
+        // MARK: 범용 텍스트 요청 함수
+    func sendText(_ prompt: String, maxTokens: Int = 1024) async throws -> String {
         let requestBody = ClaudeRequest(
             model: model,
-            maxTokens: 100,
-            messages: [ClaudeMessage(role: "user", content: [.text("안녕? 한 문장으로 인사해줘.")])]
+            maxTokens: maxTokens,
+            messages: [ClaudeMessage(role: "user", content: [.text(prompt)])]
         )
-
+        
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
         request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
         request.httpBody = try JSONEncoder().encode(requestBody)
-
+        
         let (data, response) = try await URLSession.shared.data(for: request)
-
+        
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ClaudeError.invalidResponse
         }
@@ -39,9 +45,11 @@ final class ClaudeService {
             let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
             throw ClaudeError.apiError("Status \(httpResponse.statusCode): \(errorMessage)")
         }
-
+        
         let decoded = try JSONDecoder().decode(ClaudeResponse.self, from: data)
-        return decoded.content.first?.text ?? "빈 응답"
+        guard let text = decoded.content.first(where: { $0.type == "text" })?.text else {
+            throw ClaudeError.invalidResponse
+        }
+        return text
     }
-
 }
