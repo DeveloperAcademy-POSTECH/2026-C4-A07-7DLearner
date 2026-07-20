@@ -16,8 +16,8 @@ struct CharacterDraftView: View {
         VStack(alignment: .leading, spacing: 20) {
             titleSection
             characterTitleSection
-            keywordSection
             characterStatementSection
+            keywordSection
             episodeSection
         }
         .padding(30)
@@ -53,8 +53,7 @@ struct CharacterDraftView: View {
             
             Group {
                 if viewModel.isEditingDraft == true {
-                    TextField("",text: $viewModel.draftTitle )
-                        .textFieldStyle(.plain)
+                    CustomTextField(placeholder: "", text: $viewModel.draftTitle)
                 } else {
                     Text(viewModel.draftTitle)
                 }
@@ -133,8 +132,7 @@ struct CharacterDraftView: View {
             
             Group {
                 if viewModel.isEditingDraft {
-                    TextField("", text: $viewModel.draftCharacterStatement)
-                        .textFieldStyle(.plain)
+                    CustomTextField(placeholder: "", text: $viewModel.draftCharacterStatement)
                 } else {
                     Text(viewModel.draftCharacterStatement)
                 }

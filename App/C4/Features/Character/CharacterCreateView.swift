@@ -19,12 +19,10 @@ struct CharacterCreateView: View {
         VStack(alignment: .leading, spacing: 20) {
             titleSection
             characterTitleSection
-            keywordSection
             characterStatementSection
+            keywordSection
         }
         .padding(30)
-        
-        
     }
     
     // MARK: Components
@@ -59,18 +57,15 @@ struct CharacterCreateView: View {
             Text("만들고 싶은 캐릭터를 한 문장이나 짧은 이름으로 표현해보세요.")
                 .font(Font.custom("SF Pro", size: 12))
                 .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
-            
-            TextField("ex) 실패를 두려워하지 않는 개발자", text: $viewModel.draftTitle)
-                .textFieldStyle(.plain)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.gray.opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+        
+            CustomTextField(placeholder: "ex) 실패를 두려워하지 않는 개발자", text: $viewModel.draftTitle)
                             
             Divider()
         }
     }
+    
+    
+    
     
     // MARK: - Keyword
     private var keywordSection: some View {
@@ -175,14 +170,8 @@ struct CharacterCreateView: View {
                 .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            TextField("ex) 개발 과정에서 마주하는 실패와 어려움을 성장의 기회로 받아들입니다.", text: $viewModel.draftCharacterStatement)
-                .textFieldStyle(.plain)
-                .multilineTextAlignment(.leading)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.gray.opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+            CustomTextField(placeholder: "ex) 개발 과정에서 마주하는 실패와 어려움을 성장의 기회로 받아들입니다.", text: $viewModel.draftCharacterStatement)
+
         }
     }
 }

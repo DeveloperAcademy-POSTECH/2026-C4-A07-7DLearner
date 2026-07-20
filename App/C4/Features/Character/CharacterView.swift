@@ -27,7 +27,7 @@ struct CharacterView: View {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 10) {
                         ForEach(viewModel.characters, id: \.id){ character in
-                            CharacterCardView(character: character)
+                            CharacterCard(character: character, keywordLimit: 2)
                                 .onTapGesture {
                                     viewModel.selectCharacter(character)
                                 }
