@@ -23,11 +23,12 @@ final class KeywordLoadingViewModel {
     private let manager: EpisodeGenerationManager
     private let onComplete: () -> Void
 
-    // NOTE: tickTask and generationTask are unstructured background tasks not tied to the
-    // SwiftUI view's lifecycle — `.task { }` only cancels its own closure, not these.
-    // Currently harmless (onComplete is a no-op, no real navigation exists), but whoever
-    // wires up real navigation should cancel both tasks on view disappear to avoid stale
-    // onComplete() firing after the view is gone or overlapping tasks on re-entry.
+    // 참고: tickTask와 generationTask는 SwiftUI 뷰의 생명주기에 묶여있지 않은 별도 백그라운드 Task라서,
+    // `.task { }`가 취소돼도 (자기 자신의 클로저만 끝날 뿐) 이 두 Task는 계속 살아있다.
+    // 지금은 onComplete가 빈 클로저고 실제 네비게이션도 없어서 문제가 안 되지만,
+    // 나중에 실제 네비게이션을 연결할 땐 뷰가 사라질 때 이 두 Task를 꼭 취소해야 한다.
+    // 안 그러면 화면이 이미 없어진 뒤에 onComplete()가 뒤늦게 호출되거나,
+    // 화면에 다시 들어왔을 때 이전 Task와 겹쳐 돌 수 있다.
     private var tickTask: Task<Void, Never>?
     private var generationTask: Task<Void, Never>?
     private var startTime: Date = .now
