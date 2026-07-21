@@ -22,11 +22,11 @@ final class Attachment {
     var extractedText: String? // file의 전체 content를 String으로 변환
     
     // MARK: 관계
-    @Relationship(inverse: \Experience.attachments) var experience: Experience
+    @Relationship(inverse: \Experience.attachments) var experience: Experience?
     var episodes: [Episode] = []
     
     // MARK: 생성자
-    init(fileName: String, storedFileName: String, fileType: String, fileSize: Int, experience: Experience) {
+    init(fileName: String, storedFileName: String, fileType: String, fileSize: Int, experience: Experience? = nil) {
         self.id = UUID()
         self.fileName = fileName
         self.storedFileName = storedFileName
