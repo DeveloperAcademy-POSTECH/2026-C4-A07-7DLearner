@@ -1,0 +1,256 @@
+//
+//  KeywordDraftView.swift
+//  C4
+//
+//  Created by 박시은 on 7/21/26.
+//
+
+import SwiftUI
+import SwiftData
+
+struct KeywordDraftView: View {
+    
+    @Bindable var viewModel: KeywordViewModel
+    
+    // 어떤 카드가 선택되었는지 기억하는 상태값
+    @State private var selectedEpisodeKeyword: Keyword?
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                // MARK: - 상단 타이틀
+                titleSection
+                
+                // MARK: - 좌우 2분할 레이아웃 (경험명/기간 박스 / 첨부자료 박스)
+                HStack(alignment: .top, spacing: 24) {
+                    // [왼쪽 영역] 경험 명 & 기간 박스
+                    VStack(alignment: .leading, spacing: 20) {
+                        // 경험 명
+                        VStack(alignment: .leading, spacing: 10) {
+                            SectionHeader(title: "경험 명")
+                            
+                            HStack {
+                                Text(viewModel.draftExperienceTitle.isEmpty ? "입력된 경험 명이 없습니다." : viewModel.draftExperienceTitle)
+                                    .font(Font.custom("SF Pro", size: 13))
+                                    .foregroundColor(.black)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color.gray.opacity(0.03))
+                            .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
+                            )
+                        }
+                        
+                        // 기간 (시작일, 종료일 각각 독립된 네모 박스)
+                        VStack(alignment: .leading, spacing: 10) {
+                            SectionHeader(title: "기간")
+                            
+                            HStack(spacing: 8) {
+                                // 시작 날짜 박스
+                                HStack {
+                                    Text(viewModel.draftStartDate.isEmpty ? "YYYY.MM.DD" : viewModel.draftStartDate)
+                                        .font(Font.custom("SF Pro", size: 13))
+                                        .foregroundColor(viewModel.draftStartDate.isEmpty ? .gray : .black)
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color.gray.opacity(0.03))
+                                .cornerRadius(8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
+                                )
+                                
+                                Text("—")
+                                    .foregroundColor(.gray)
+                                
+                                // 종료 날짜 박스
+                                HStack {
+                                    Text(viewModel.draftEndDate.isEmpty ? "YYYY.MM.DD" : viewModel.draftEndDate)
+                                        .font(Font.custom("SF Pro", size: 13))
+                                        .foregroundColor(viewModel.draftEndDate.isEmpty ? .gray : .black)
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color.gray.opacity(0.03))
+                                .cornerRadius(8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
+                                )
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    // [오른쪽 영역] 첨부자료 박스
+                    VStack(alignment: .leading, spacing: 10) {
+                        SectionHeader(title: "첨부자료")
+                        
+                        if viewModel.draftAttachedFiles.isEmpty {
+                            Text("첨부된 자료가 없습니다.")
+                                .font(Font.custom("SF Pro", size: 12))
+                                .foregroundColor(.gray)
+                                .padding(.vertical, 8)
+                        } else {
+                            VStack(spacing: 8) {
+                                ForEach(viewModel.draftAttachedFiles) { file in
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "doc.text")
+                                            .foregroundColor(.blue)
+                                            .font(.system(size: 12))
+                                        Text(file.fileName)
+                                            .font(Font.custom("SF Pro", size: 13))
+                                            .foregroundColor(.black)
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .background(Color.gray.opacity(0.03))
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                
+                Divider()
+                
+                // MARK: - 키워드별 에피소드 카드 (가로 스크롤)
+                VStack(alignment: .leading, spacing: 10) {
+                    SectionHeader(
+                        title: "키워드별 에피소드",
+                        descriptions: "선택한 키워드를 기반으로 AI가 분석한 경험이에요."
+                    )
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(viewModel.draftKeywords, id: \.self) { keywordName in
+                                let keywordObj = Keyword(name: keywordName)
+                                let experienceObj = Experience(
+                                    title: viewModel.draftExperienceTitle,
+                                    periodStart: .now,
+                                    periodEnd: .now,
+                                    experienceStatement: viewModel.draftStatement
+                                )
+                                // 전달해주신 에피소드 생성 결과 DTO 포맷 구조 반영
+                                let episodeObj = Episode(
+                                    title: "위기 극복 및 역할 분담 소통",
+                                    problemContext: "출시 3주 전 메인 디자이너 하차로 인한 패닉 상황 발생",
+                                    concernPoint: "개발팀과 남은 인원들 간의 업무 분담 혼선",
+                                    myAction: "임시 PM 자처 및 15분 스탠드업 미팅 도입, R&R 재분배",
+                                    outcome: "갈등 없이 프로젝트 정상 궤도 복귀 및 앱스토어 제출 완료",
+                                    sourceExcerpt: "",
+                                    experience: experienceObj,
+                                    keyword: keywordObj,
+                                    attachment: viewModel.draftAttachedFiles.first
+                                )
+                                
+                                KeywordEpisodeCard(
+                                    keyword: keywordObj,
+                                    episodes: [episodeObj]
+                                )
+                                .onTapGesture {
+                                    selectedEpisodeKeyword = keywordObj
+                                }
+                                .scaleEffect(selectedEpisodeKeyword?.name == keywordObj.name ? 1.02 : 1.0)
+                                .animation(.spring(response: 0.3), value: selectedEpisodeKeyword)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+                
+                // MARK: - 선택된 에피소드 상세 내용 하단 표출 영역
+                if let selectedKeyword = selectedEpisodeKeyword {
+                    Divider()
+                        .padding(.vertical, 10)
+                    
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "tag")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.blue)
+                                .padding(4)
+                                .background(RoundedRectangle(cornerRadius: 6).fill(Color.blue.opacity(0.25)))
+                            
+                            Text(selectedKeyword.name)
+                                .font(Font.custom("SF Pro", size: 14).weight(.semibold))
+                            
+                            Text("1")
+                                .font(.system(size: 10))
+                                .frame(width: 18, height: 18)
+                                .background(RoundedRectangle(cornerRadius: 6).fill(Color.black.opacity(0.1)))
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("\(viewModel.draftExperienceTitle.isEmpty ? "경험명" : viewModel.draftExperienceTitle): 위기 극복 및 역할 분담 소통")
+                                .font(Font.custom("SF Pro", size: 13).weight(.medium))
+                                .foregroundColor(.black)
+                            
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("- 문제상황: 출시 3주 전 메인 디자이너 하차로 인한 패닉 상황 발생")
+                                Text("- 고민 포인트: 개발팀과 남은 인원들 간의 업무 분담 혼선")
+                                Text("- 나의 액션: 임시 PM 자처 및 15분 스탠드업 미팅 도입, R&R 재분배")
+                                Text("- 성과 및 배움: 갈등 없이 프로젝트 정상 궤도 복귀 및 앱스토어 제출 완료")
+                            }
+                            .font(Font.custom("SF Pro", size: 12))
+                            .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
+                            .lineSpacing(4)
+                        }
+                    }
+                    .padding(.top, 8)
+                }
+            }
+            .padding(30)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+        }
+    }
+    
+    // MARK: - Title Section
+    private var titleSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("상세보기")
+                .font(Font.custom("SF Pro", size: 22).weight(.bold))
+                .foregroundColor(.black)
+            
+            Divider()
+        }
+    }
+}
+
+// MARK: - Preview
+#Preview {
+    let container = try! ModelContainer(
+        for: Keyword.self,
+        Episode.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    
+    let previewViewModel = KeywordViewModel(modelContext: container.mainContext)
+    previewViewModel.draftExperienceTitle = "애플 디벨로퍼 아카데미 C3"
+    previewViewModel.draftStartDate = "2026.04.22"
+    previewViewModel.draftEndDate = "2026.05.22"
+    previewViewModel.draftKeywords = ["협업", "문제해결력", "자기주도성"]
+    previewViewModel.draftStatement = "디자이너 부재 위기 속에서 임시 PM을 맡아 스탠드업 미팅을 도입하고 R&R을 재분배하여 성공적으로 프로젝트를 완수했다."
+    
+    previewViewModel.draftAttachedFiles = [
+        Attachment(fileName: "C4 마일스톤-1", storedFileName: "1.pdf", fileType: "pdf", fileSize: 100),
+        Attachment(fileName: "C4 childrunner", storedFileName: "2.pdf", fileType: "pdf", fileSize: 100)
+    ]
+    
+    return KeywordDraftView(viewModel: previewViewModel)
+        .modelContainer(container)
+        .frame(width: 850, height: 800)
+}
