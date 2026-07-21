@@ -43,7 +43,7 @@ private extension RootView {
         case .home:
             HomeView(viewModel: HomeViewModel(modelContext: modelContext))
         case .experience:
-            ExperienceView(modelContext: modelContext)
+            KeywordView(viewModel: KeywordViewModel(modelContext: modelContext))
         case .character:
             CharacterView(viewModel: CharacterViewModel(modelContext: modelContext))
         case .none:
