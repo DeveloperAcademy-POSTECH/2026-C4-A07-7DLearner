@@ -23,18 +23,22 @@ struct SectionHeader: View {
     
     var body: some View {
         
-        Text(title)
-            .font(
-                Font.custom("SF Pro", size: 15)
-                    .weight(.semibold)
-            )
-            .foregroundColor(.black)
-        
-        if let descriptions {
-            Text(descriptions)
-                .font(Font.custom("SF Pro", size: 12))
-                .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title)
+                .font(
+                    Font.custom("SF Pro", size: 15)
+                        .weight(.semibold)
+                )
+                .foregroundColor(.black)
+            
+            if let descriptions {
+                Text(descriptions)
+                    .font(Font.custom("SF Pro", size: 12))
+                    .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
+            }
         }
+        
+
     }
 }
 
