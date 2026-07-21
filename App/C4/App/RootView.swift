@@ -41,7 +41,7 @@ private extension RootView {
     var detailContent: some View {
         switch selection {
         case .home:
-            HomeView(viewModel: HomeViewModel(modelContext: modelContext))
+            Text("홈 화면")
         case .experience:
             Text("경험 화면")
         case .character:
