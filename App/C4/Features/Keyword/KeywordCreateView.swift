@@ -31,7 +31,7 @@ struct KeywordCreateView: View {
                 HStack(alignment: .top, spacing: 24) {
                     VStack(alignment: .leading, spacing: 10) {
                         SectionHeader(title: "경험 명", descriptions: "무엇을 했던 경험인가요?")
-                        CustomTextField(placeholder: "애플 디벨로퍼 아카데미 C4", text: $experienceTitle)
+                        CustomTextField(placeholder: "ex.애플 디벨로퍼 아카데미 C4", text: $experienceTitle)
                     }
                     .frame(maxWidth: .infinity)
                     
@@ -57,18 +57,103 @@ struct KeywordCreateView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
+                            // 작성된 키워드 태그들
                             ForEach(selectedKeywords, id: \.self) { keyword in
                                 KeywordTag(text: keyword, onRemove: {
                                     selectedKeywords.removeAll { $0 == keyword }
                                 }, style: .selected)
                             }
                             
-                            //
+                            // 새 키워드 입력 필드
+                            HStack(spacing: 8) {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.gray)
+                                
+                                TextField("키워드 입력", text: $newKeyword)
+                                    .textFieldStyle(.plain)
+                                    .font(Font.custom("SF Pro", size: 13))
+                                    .frame(minWidth: 80)
+                                    .onSubmit {
+                                        let trimmed = newKeyword.trimmingCharacters(in: .whitespaces)
+                                        if !trimmed.isEmpty && !selectedKeywords.contains(trimmed) {
+                                            selectedKeywords.append(trimmed)
+                                        }
+                                        newKeyword = "" // 추가 후 입력창 초기화
+                                    }
+                            }
+                            .padding(.horizontal, 10)
+                            .frame(height: 28)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(6)
                         }
                     }
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                }
+                .padding(.bottom, 17)
+                
+                Divider()
+                    .padding(.bottom, 63)
+                
+                // 자료 첨부
+                VStack(alignment: .leading, spacing: 10) {
+                    SectionHeader(title: "자료 첨부 (선택)", descriptions: "해당 경험과 관련된 자료를 첨부해주세요.")
+                    
+                    VStack(spacing: 8) {
+                        Image(systemName: "icloud.and.arrow.up")
+                            .font(.system(size: 24))
+                            .foregroundColor(Color.gray.opacity(0.6))
+                        Text("txt, md, csv, pdf • Up to 50MB")
+                            .font(Font.custom("SF Pro", size: 11))
+                            .foregroundColor(.gray)
+                        
+                        Button(action: {
+                            // 파일 첨부 액션
+                        }) {
+                            Text("자료 첨부")
+                                .font(Font.custom("SF Pro", size: 11).weight(.medium))
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.white)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.top, 4)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 32)
+                    .background(Color.gray.opacity(0.02))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.3), style: StrokeStyle(lineWidth: 1, dash: [4]))
+                    )
+                }
+                .padding(.bottom, 40)
+                
+                Divider()
+                    .padding(.bottom, 63)
+                
+                // 경험 진술
+                VStack(alignment: .leading, spacing: 10) {
+                    SectionHeader(title: "경험진술", descriptions: "아래 질문에 답하듯 편하게 썰을 풀어주세요. 완벽한 문장이 아니어도 괜찮아요! 자세한 내용이 담길수록 명확한 에피소드가 생성됩니다.")
+                    
+                    CustomTextEditor(
+                        placeholder: "막막하다면 아래 질문에 대답하듯 의식의 흐름대로 적어보세요!\n\nQ. 이 프로젝트에서 나의 메인 역할은 무엇이었나요?\nQ. 진행 중 겪었던 가장 빡쳤던(?) 위기나 한계는 무엇이었나요?\nQ. 그 위기를 넘기기 위해 '나'는 구체적으로 어떤 고민과 행동을 했나요?\nQ. 결과적으로 무엇을 이뤄냈고, 무엇을 배웠나요?",
+                        text: $statement
+                    )
                 }
             }
+            .padding(24)
         }
     }
 }
-
