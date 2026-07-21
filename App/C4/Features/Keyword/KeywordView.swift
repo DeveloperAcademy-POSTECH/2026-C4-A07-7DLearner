@@ -29,7 +29,7 @@ struct KeywordView: View {
         .navigationTitle("키워드")
         // 메인 툴바 분기 처리
         .toolbar {
-            mainToolbar
+            keywordToolbar
         }
         // MARK: - Inspector
         .inspector(isPresented: Binding(
@@ -57,11 +57,6 @@ struct KeywordView: View {
                 }
             }
             .inspectorColumnWidth(min: 350, ideal: 420, max: 600)
-            
-            // 인스펙터 툴바 분기 처리
-            .toolbar {
-                inspectorToolbar
-            }
         }
     }
     
@@ -128,171 +123,124 @@ struct KeywordView: View {
         }
     }
     
-    // MARK: - 메인 툴바
+    // MARK: - 툴바
     @ToolbarContentBuilder
-    private var mainToolbar: some ToolbarContent {
-        if viewModel.keywords.isEmpty {
+    private var keywordToolbar: some ToolbarContent {
+        switch viewModel.currentInspectorScreen {
+            
+            // 인스펙터 안 켜져 있을 때 (기본 메인 화면)
+        case nil:
             ToolbarItem(placement: .primaryAction) {
-                Button(action: {
-                    viewModel.currentInspectorScreen = .create
-                    viewModel.selectedKeyword = nil
-                }) {
+                Button {
+                    viewModel.startKeywordCreation()
+                } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "plus")
                         Text("새 키워드")
                     }
-                    .font(Font.custom("SF Pro", size: 14).weight(.medium))
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 10)
-                    .frame(height: 28)
                 }
-                .buttonStyle(.plain)
-                .clipShape(Capsule())
-                .fixedSize()
             }
-        } else {
-            // 데이터 있을 때
-            ToolbarItem(placement: .navigation) {
-                Button(action: {
-                    // 휴지통 액션
-                }) {
-                    Image(systemName: "trash")
-                        .font(.system(size: 14))
-                        .frame(width: 36, height: 36)
-                }
-                .buttonStyle(.plain)
-                .clipShape(Circle())
-                .fixedSize()
-            }
-        }
-    }
-    
-    // MARK: - 인스펙터 툴바
-    //    @ToolbarContentBuilder
-    //    private var inspectorToolbar: some ToolbarContent {
-    //        if !viewModel.keywords.isEmpty {
-    //            ToolbarItemGroup(placement: .primaryAction) {
-    //                Button(action: {
-    //                    viewModel.currentInspectorScreen = .create
-    //                    viewModel.selectedKeyword = nil
-    //                }) {
-    //                    // 새 키워드 버튼
-    //                    HStack(spacing: 4) {
-    //                        Image(systemName: "plus")
-    //                        Text("새 키워드")
-    //                    }
-    //                    .font(Font.custom("SF Pro", size: 14).weight(.medium))
-    //                    .foregroundColor(.black)
-    //                    .padding(.horizontal, 10)
-    //                    .frame(height: 36)
-    //                }
-    //                .buttonStyle(.plain)
-    //                .clipShape(Capsule())
-    //                .fixedSize()
-    //
-    //                Spacer()
-    //                    .frame(width: 120)
-    //
-    //                // 돋보기 검색 버튼
-    //                Button(action: {
-    //                    // 검색 액션
-    //                }) {
-    //                    Image(systemName: "magnifyingglass")
-    //                        .font(.system(size: 14))
-    //                        .foregroundColor(.black)
-    //                        .frame(width: 36, height: 36)
-    //                }
-    //                .buttonStyle(.plain)
-    //                .clipShape(Circle())
-    //                .fixedSize()
-    //            }
-    //        }
-    //    }
-    //}
-    @ToolbarContentBuilder
-    private var inspectorToolbar: some ToolbarContent {
-        switch viewModel.currentInspectorScreen {
+            
+            // 인스펙터 [생성창] 상태일 때
         case .create:
-            // 생성 화면일 때: X, 임시저장, 분석 버튼
-            ToolbarItem(placement: .navigation) {
-                // 좌측 상단 (X 버튼)
-                Button(action: {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
                     viewModel.currentInspectorScreen = nil
-                }) {
+                } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14))
-                        .foregroundColor(.black)
                 }
-                .buttonStyle(.plain)
             }
             
-            ToolbarItemGroup(placement: .primaryAction) {
-                // 우측 상단 (임시저장, 분석)
-                Button(action: {
-                    // 임시저장 액션
-                }) {
-                    Text("임시저장")
-                        .font(Font.custom("SF Pro", size: 13).weight(.medium))
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 14)
-                        .frame(height: 28)
-                        .overlay(
-                            Capsule().stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                        )
-                }
-                .buttonStyle(.plain)
-                
-                Button(action: {
-                    viewModel.currentInspectorScreen = .loading
-                }) {
-                    Text("분석")
-                        .font(Font.custom("SF Pro", size: 13).weight(.medium))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .frame(height: 28)
-                        .background(Color(red: 0.0, green: 0.48, blue: 1.0)) // mainBlue
-                        .clipShape(Capsule())
-                }
-                .buttonStyle(.plain)
-            }
-            
-        default:
-            // 기본 상태일 때: 새 키워드, 검색 버튼 표시
-            if !viewModel.keywords.isEmpty {
-                ToolbarItemGroup(placement: .primaryAction) {
-                    Button(action: {
-                        viewModel.currentInspectorScreen = .create
-                        viewModel.selectedKeyword = nil
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus")
-                            Text("새 키워드")
-                        }
-                        .font(Font.custom("SF Pro", size: 14).weight(.medium))
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 10)
-                        .frame(height: 28)
+            ToolbarItem(placement: .primaryAction) {
+                HStack(spacing: 12) {
+                    Button {
+                        // 임시저장 액션
+                    } label: {
+                        Text("임시저장")
                     }
-                    .buttonStyle(.plain)
-                    .background(Color.gray.opacity(0.12))
-                    .clipShape(Capsule())
-                    .fixedSize()
                     
-                    Spacer()
-                        .frame(width: 120)
+                    Button {
+                        viewModel.currentInspectorScreen = .loading
+                    } label: {
+                        Text("분석")
+                    }
+                    .disabled(!viewModel.isDraftReadyToAnalyze)
+                }
+            }
+            
+            // 인스펙터 [로딩] 상태일 때 (툴바 없음)
+        case .loading:
+            ToolbarItem(placement: .primaryAction) {
+                EmptyView()
+            }
+            
+            // 인스펙터 [초안창] 상태일 때
+        case .draft:
+            ToolbarItem(placement: .cancellationAction) {
+                HStack(spacing: 8) {
+                    Button {
+                        viewModel.currentInspectorScreen = nil
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
                     
-                    Button(action: {
+                    Button {
+                        // 편집 버튼 액션
+                    } label: {
+                        Image(systemName: "pencil")
+                    }
+                }
+            }
+            
+            ToolbarItem(placement: .primaryAction) {
+                HStack(spacing: 12) {
+                    Button {
+                        // 임시저장 액션
+                    } label: {
+                        Text("임시저장")
+                    }
+                    
+                    Button {
+                        // 저장(완료) 액션
+                        viewModel.currentInspectorScreen = nil
+                    } label: {
+                        Text("저장")
+                    }
+                }
+            }
+            
+            // 인스펙터 [디테일 / 키워드 리스트] 상태일 때
+        case .detail:
+            ToolbarItem(placement: .cancellationAction) {
+                HStack(spacing: 8) {
+                    Button {
+                        viewModel.startKeywordCreation()
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    
+                    Button {
+                        // 편집 액션
+                    } label: {
+                        Image(systemName: "pencil")
+                    }
+                }
+            }
+            
+            ToolbarItem(placement: .primaryAction) {
+                HStack(spacing: 12) {
+                    Button {
+                        // 메인뷰 휴지통 액션
+                    } label: {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
+                    }
+                    
+                    Button {
                         // 검색 액션
-                    }) {
+                    } label: {
                         Image(systemName: "magnifyingglass")
-                            .font(.system(size: 13))
-                            .foregroundColor(.black)
-                            .frame(width: 28, height: 28)
                     }
-                    .buttonStyle(.plain)
-                    .background(Color.gray.opacity(0.12))
-                    .clipShape(Circle())
-                    .fixedSize()
                 }
             }
         }

@@ -27,8 +27,20 @@ final class KeywordViewModel {
     
     // MARK: Draft State
     var draftExperienceTitle: String = ""
-    var draftExperienceDescription: String = ""
+    var draftStartDate: String = ""
+    var draftEndDate: String = ""
+    var draftStatement: String = ""
+    var draftKeywords: [String] = []
+    var draftAttachedFiles: [Attachment] = []
     
+    // 분석 버튼 활성화를 위한 필수값 검증 프로퍼티
+    var isDraftReadyToAnalyze: Bool {
+        !draftExperienceTitle.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !draftStartDate.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !draftEndDate.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !draftStatement.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !draftKeywords.isEmpty
+    }
     // MARK: Initializer
     init(modelContext: ModelContext) {
         self.context = modelContext
@@ -36,7 +48,6 @@ final class KeywordViewModel {
     }
     
     // MARK: - Functions
-    
     // 저장된 전체 키워드 조회
     func fetchKeywords() {
         do {
@@ -48,18 +59,25 @@ final class KeywordViewModel {
     }
     // 특정 키워드와 연결된 에피소드 반환
     func episodesForKeyword(keyword: Keyword) -> [Episode] {
-        // Keyword 모델 안에 episodes 배열이 있다고 가정
         return keyword.episodes
     }
     
-    // AI 분석을 통해 에피소드를 생성하는 비동기 함수 (임시 뼈대)
     @MainActor
     func generateEpisodes() async {
         try? await Task.sleep(for: .seconds(2))
         print("분석 완료 로직")
     }
     
-    func episodesForKeyword(_ keyword: Keyword) -> [Episode] {
-        return keyword.episodes
+    // 생성창 초기화 함수
+    func startKeywordCreation() {
+        draftExperienceTitle = ""
+        draftStartDate = ""
+        draftEndDate = ""
+        draftStatement = ""
+        draftKeywords = []
+        draftAttachedFiles = []
+        
+        selectedKeyword = nil
+        currentInspectorScreen = .create
     }
 }
