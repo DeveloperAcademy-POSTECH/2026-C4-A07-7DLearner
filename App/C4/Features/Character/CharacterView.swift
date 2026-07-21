@@ -1,33 +1,37 @@
+//
+//  CharacterView.swift
+//  C4
+//
+//  Created by jiwon hong on 7/20/26.
+//
+
 import SwiftUI
 import SwiftData
 
-// MARK: Character View
 struct CharacterView: View {
     
-    // MARK: ViewModel
     @Bindable private var viewModel: CharacterViewModel
+    @Query private var characters: [Character]
+    
+    //    @Query(sort: \Character.createdAt, order: .reverse) private var characters: [Character]
         
-    // MARK: Properties
     private let columns = [GridItem(.adaptive(minimum: 224))]
     
-    // MARK: Initializer
     init(viewModel: CharacterViewModel) {
         self.viewModel = viewModel
     }
     
-    // MARK: Body
     var body: some View {
         
         VStack{
-            
-            if viewModel.characters.isEmpty {
+            if characters.isEmpty {
                 Text("아직 생성된 캐릭터가 없습니다. + 버튼을 눌러 새로운 캐릭터를 만들어 보세요")
             }
             else {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 10) {
-                        ForEach(viewModel.characters, id: \.id){ character in
-                            CharacterCardView(character: character)
+                        ForEach(characters, id: \.id){ character in
+                            CharacterCard(character: character, keywordLimit: 2)
                                 .onTapGesture {
                                     viewModel.selectCharacter(character)
                                 }
@@ -36,7 +40,6 @@ struct CharacterView: View {
                 }
                 .padding()
             }
-            
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .inspector(isPresented: Binding(
@@ -50,16 +53,7 @@ struct CharacterView: View {
             }
         )
         ){
-            Group {
-                switch viewModel.currentInspectorScreen {
-                case .create: CharacterCreateView(viewModel: viewModel)
-                case .draft: CharacterDraftView(viewModel: viewModel)
-                case .loading: CharacterLoadingView(viewModel: viewModel)
-                case .detail: CharacterDetailView(viewModel: viewModel)
-                case nil: EmptyView()
-                }
-            }
-            .inspectorColumnWidth(min: 350, ideal: 420, max: 600)
+            CharacterInspectorView(viewModel: viewModel)
         }
         .toolbar {
             characterToolbar
@@ -67,10 +61,9 @@ struct CharacterView: View {
         
     }
     
-    // MARK: Toolbar
+    // MARK:  - Toolbar
     @ToolbarContentBuilder
     private var characterToolbar: some ToolbarContent {
-        
         switch viewModel.currentInspectorScreen {
         case nil:
             ToolbarItem(placement: .primaryAction) {
