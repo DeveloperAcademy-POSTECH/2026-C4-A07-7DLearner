@@ -121,3 +121,9 @@ Backups.backupdb
 MobileBackups.trash
 tmbootpicker.efi
 **/Secrets.swift
+
+# superpowers scratch (task briefs/reports/progress ledger for subagent-driven-development)
+.superpowers/
+
+# superpowers design specs/plans (local working docs, not tracked in repo history)
+docs/superpowers/
