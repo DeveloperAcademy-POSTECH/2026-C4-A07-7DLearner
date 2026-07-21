@@ -17,40 +17,36 @@ struct KeywordEpisodeCard: View {
         
         VStack(alignment: .leading, spacing: 10) {
             HStack{
-                HStack(spacing: 5){
+                HStack(spacing: 6){
                     Image(systemName: "tag")
                         .font(.system(size: 10))
+                        .foregroundStyle(.blue)
+                        .padding(3)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color.blue.opacity(0.25))
+                                .frame(height: 20)
+                        )
                     
                     Text(keyword.name)
                         .font(
                             Font.custom("SF Pro", size: 12)
                                 .weight(.semibold)
                         )
+                    
+                    Text("\(episodes.count)")
+                        .font(.system(size: 10))
+                        .frame(width: 15, height: 15, alignment: .center)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color.black.opacity(0.125))
+                                                            
+                        )
                 }
-                .foregroundStyle(.blue)
-                .padding(3)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color.blue.opacity(0.25))
-                        .frame(height: 20)
-                )
-                
-                Spacer()
-                
-                Text("\(episodes.count)")
-                    .font(.system(size: 10))
-                    .background(
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(Color.black.opacity(0.125))
-                            .frame(width: 20, height: 20, alignment: .center)
-                        
-                    )
-                
-                
             }
             
             ForEach(episodes, id: \.id) { episode in
-                VStack(alignment: .leading,spacing: 5) {
+                VStack(alignment: .leading,spacing: 7) {
                     Text(episode.experience.title)
                         .font(
                             Font.custom("SF Pro", size: 10)
@@ -72,7 +68,7 @@ struct KeywordEpisodeCard: View {
         }
         .padding(20)
         .frame(width: 232, alignment: .topLeading)
-        .background(.white)
+        .background(Color(red: 0.95, green: 0.95, blue: 0.95))
         .cornerRadius(10)
         .overlay(
             RoundedRectangle(cornerRadius: 10)
