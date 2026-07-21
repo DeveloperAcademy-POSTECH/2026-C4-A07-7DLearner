@@ -6,15 +6,26 @@
 //
 
 enum SidebarItem: String, CaseIterable {
-    case home = "홈"
-    case experience = "경험"
+    case keyword = "키워드"
     case character = "캐릭터"
+    case office = "오피스"
+    case draft = "임시저장"
+    case trash = "휴지통"
     
     var icon: String {
         switch self {
-        case .home: "house"
-        case .experience: "tray.2"
-        case .character: "person.crop.rectangle.stack"
+        case .keyword: "tag"
+        case .character: "person"
+        case .office: "building.2"
+        case .draft: "archivebox"
+        case .trash: "trash"
+        }
+    }
+    
+    var isPrimarySection: Bool {
+        switch self {
+        case .keyword, .character, .office: true
+        case .draft, .trash: false
         }
     }
 }
