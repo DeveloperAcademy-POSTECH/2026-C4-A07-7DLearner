@@ -32,6 +32,7 @@ struct CharacterView: View {
                     LazyVGrid(columns: columns, spacing: 10) {
                         ForEach(characters, id: \.id){ character in
                             CharacterCard(character: character, keywordLimit: 2)
+                                
                                 .onTapGesture {
                                     viewModel.selectCharacter(character)
                                 }
@@ -75,53 +76,107 @@ struct CharacterView: View {
             }
             
         case .create:
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    viewModel.generateDraft()
-                } label: {
-                    Image(systemName: "chevron.right")
+            
+            if viewModel.isEditing {
+                
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        viewModel.currentInspectorScreen = .detail
+                    } label: {
+                        Text("취소")
+                            .font(
+                            Font.custom("SF Pro", size: 13)
+                            .weight(.medium)
+                            )
+                            .foregroundColor(Constants.LabelsVibrantUsePlusLighterDarkerPrimary)
+                            
+                    }
+                    .buttonStyle(.glass)
                 }
-                .disabled(!viewModel.isDraftReadyToSave)
+                
+                ToolbarSpacer()
+                
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        viewModel.saveEditedCharacter()
+                    } label: {
+                        Text("저장")
+                            .font(
+                            Font.custom("SF Pro", size: 13)
+                            .weight(.medium)
+                            )
+                            .foregroundColor(Constants.LabelsWhite)
+                            
+                    }
+                    .buttonStyle(.glassProminent)
+                    .tint(.blue)
+                    .disabled(!viewModel.isDraftReadyToSave)
+                }
+            } else {
+                ToolbarItem(placement: .navigation) {
+                    Button {
+                        viewModel.currentInspectorScreen = nil
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .buttonStyle(.glass)
+                }
+                
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        //action
+                    } label: {
+                        Text("임시저장")
+                            .font(
+                            Font.custom("SF Pro", size: 13)
+                            .weight(.medium)
+                            )
+                            .foregroundColor(Constants.LabelsVibrantUsePlusLighterDarkerPrimary)
+                    }
+                    .buttonStyle(.glass)
+                }
+                
+                ToolbarSpacer()
+                
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        viewModel.generateDraft()
+                    } label: {
+                        Text("분석")
+                            .font(
+                            Font.custom("SF Pro", size: 13)
+                            .weight(.medium)
+                            )
+                            .foregroundColor(Constants.LabelsWhite)
+                            
+                    }
+                    .buttonStyle(.glassProminent)
+                    .tint(.blue)
+                    .disabled(!viewModel.isDraftReadyToSave)
+                }
             }
             
         case .loading:
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    viewModel.showDraft()
+                    viewModel.completeCharacterGeneration()
                 } label: {
                     Image(systemName: "chevron.right")
                 }
             }
-            
         case .draft:
-            ToolbarItem(placement: .primaryAction) {
+            ToolbarItem(placement: .automatic) {
                 
-                if !viewModel.isEditingDraft {
-                    Button {
-                        viewModel.enableDraftEditing()
-                    } label: {
-                        Image(systemName: "pencil")
-                    }
-                }
             }
-            
-            ToolbarSpacer(.flexible)
-            
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    viewModel.createCharacter()
-                } label: {
-                    Image(systemName: "checkmark")
-                }
-            }
-            
+                        
         case .detail:
             ToolbarItem(placement: .automatic) {
                 Button {
-                    //action
+                    viewModel.startEditingCharacter()
                 } label: {
-                    Text("...")
+                    Text("편집")
                 }
+                .buttonStyle(.glass)
             }
         }
         

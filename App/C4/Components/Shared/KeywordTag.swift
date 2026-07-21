@@ -48,21 +48,7 @@ struct KeywordTag: View {
     }
     
     var body: some View {
-//        Text(text)
-//            .font(
-//                Font.custom("SF Pro", size:Constants.GlobalFontSize)
-//                    .weight(.medium)
-//            )
-//            .foregroundColor(Color(red: 0, green: 0.4, blue: 0.8).opacity(0.85))
-//            .multilineTextAlignment(.center)
-//            .lineLimit(1)
-//            .fixedSize(horizontal: true, vertical: false)
-//            .padding(.horizontal, 6)
-//            .padding(.vertical, 3)
-//            .background(Color(red: 0.85, green: 0.93, blue: 1))
-//            .cornerRadius(8)
-        
-        
+
         HStack (spacing: 4) {
             Text(text)
                 .multilineTextAlignment(.center)
