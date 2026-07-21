@@ -14,8 +14,8 @@ final class ClaudeService {
     private let model = "claude-sonnet-5"
     
     init() {
-//        self.apiKey = Secrets.claudeAPIKey
-        self.apiKey = "a"
+        //self.apiKey = Secrets.claudeAPIKey
+        self.apiKey = "APIKey"
     }
 }
 
