@@ -31,8 +31,17 @@ struct C4App: App {
     
     // MARK: App의 진입점 설정, Container 주입
     var body: some Scene {
-        WindowGroup {
-            RootView()
+        Group {
+            WindowGroup {
+                RootView()
+            }
+            
+            Settings {
+                TabView {
+                    GeneralSettingsView()
+                        .tabItem { Label("일반", systemImage: "gearshape") }
+                }
+            }
         }
         .modelContainer(container)
     }
