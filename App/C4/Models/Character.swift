@@ -7,6 +7,9 @@ final class Character {
     // MARK: 식별자
     var id: UUID
     
+    // MARK: 시스템 데이터
+//    var createdAt: Date
+    
     // MARK: 사용자 입력값
     var title: String
     var characterStatement: String // 캐릭터 생성 시 입력 받는 '캐릭터 설명'
@@ -15,8 +18,9 @@ final class Character {
     @Relationship(inverse: \Keyword.characters) var keywords: [Keyword] = []
     
     // MARK: 생성자
-    init(title: String, characterStatement: String, keywords: [Keyword]) {
+    init(title: String, characterStatement: String, keywords: [Keyword]/*, createdAt: Date = .now*/) {
         self.id = UUID()
+//        self.createdAt = createdAt
         self.title = title
         self.characterStatement = characterStatement
         self.keywords = keywords

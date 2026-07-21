@@ -21,7 +21,6 @@ struct RootView: View {
             detailContent
         }
     }
-    
 }
 
 // MARK: - 사이드바
@@ -41,7 +40,7 @@ private extension RootView {
     var detailContent: some View {
         switch selection {
         case .home:
-            HomeView(viewModel: HomeViewModel(modelContext: modelContext))
+            Text("홈 화면")
         case .experience:
             KeywordView(viewModel: KeywordViewModel(modelContext: modelContext))
         case .character:
