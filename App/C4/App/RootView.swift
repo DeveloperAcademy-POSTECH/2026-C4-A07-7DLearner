@@ -42,7 +42,7 @@ private extension RootView {
         case .home:
             Text("홈 화면")
         case .experience:
-            Text("경험 화면")
+            KeywordLoadingDevPreview()
         case .character:
             CharacterView(viewModel: CharacterViewModel(modelContext: modelContext))
         case .none:
