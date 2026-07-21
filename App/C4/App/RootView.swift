@@ -21,7 +21,6 @@ struct RootView: View {
             detailContent
         }
     }
-    
 }
 
 // MARK: - 사이드바

@@ -1,14 +1,18 @@
+//
+//  KeywordEpisodeCard.swift
+//  C4
+//
+//  Created by jiwon hong on 7/20/26.
+//
+
 import SwiftUI
 import SwiftData
 
-// MARK: Keyword Episode Card
 struct KeywordEpisodeCard: View {
     
-    // MARK: Properties
     let keyword: Keyword
     let episodes: [Episode]
     
-    // MARK: Body
     var body: some View {
         
         VStack(alignment: .leading, spacing: 10) {
