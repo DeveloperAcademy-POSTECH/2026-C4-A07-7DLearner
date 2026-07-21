@@ -35,7 +35,7 @@ struct ExperienceRepository {
 // AttachmentRepository을 호출하여 작업 수행
 extension ExperienceRepository {
     
-    func createAttachment(fileName: String, storedFileName: String, fileType: String, fileSize: Int, experience: Experience) -> Attachment {
+    func createAttachment(fileName: String, storedFileName: String, fileType: String, fileSize: Int, experience: Experience? = nil) -> Attachment {
         AttachmentRepository(context: context)
             .create(fileName: fileName, storedFileName: storedFileName, fileType: fileType, fileSize: fileSize, experience: experience)
     }
