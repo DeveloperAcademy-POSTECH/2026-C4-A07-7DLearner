@@ -50,23 +50,23 @@ private extension KeywordLoadingView {
                 .overlay(
                     RoundedRectangle(cornerRadius: 7)
                         .inset(by: 0.5)
-                        .stroke(.black, lineWidth: 1)
+                        .stroke(Color.primary, lineWidth: 1)
                 )
 
             Text("자료를 읽고 있어요")
                 .font(.system(size: 17, weight: .bold))
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
                 .multilineTextAlignment(.center)
 
             Text("자료를 취합하는 중입니다.\n잠시만 기다려 주세요.")
                 .font(.system(size: 17))
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
             Text("\(Int(viewModel.progress * 100))%")
                 .font(.system(size: 17))
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
 
             progressBar
 
@@ -105,11 +105,11 @@ private extension KeywordLoadingView {
 
             Text("생성에 실패했어요")
                 .font(.system(size: 17, weight: .bold))
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
 
             Text(viewModel.errorMessage ?? "알 수 없는 오류가 발생했습니다.")
                 .font(.system(size: 15))
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
                 .multilineTextAlignment(.center)
 
             Button("다시 시도") {
@@ -130,7 +130,7 @@ private struct StepRow: View {
             icon
             Text(step.title)
                 .font(.system(size: 13))
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
         }
     }
 
