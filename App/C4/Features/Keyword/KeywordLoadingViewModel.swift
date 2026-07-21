@@ -40,6 +40,7 @@ final class KeywordLoadingViewModel {
         progress = 0
         currentStep = .analyzeKeyword
         startTime = .now
+        manager.errorMessage = nil
 
         tickTask = Task { await self.runTicker() }
         generationTask = Task { await self.runGeneration() }
@@ -71,6 +72,7 @@ final class KeywordLoadingViewModel {
 
     private func runGeneration() async {
         await manager.generateEpisodes(for: experience)
+        if Task.isCancelled { return }
         tickTask?.cancel()
 
         if let message = manager.errorMessage {
