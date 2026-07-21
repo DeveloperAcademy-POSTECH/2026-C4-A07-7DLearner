@@ -30,7 +30,7 @@ private extension RootView {
             Label(item.rawValue, systemImage: item.icon)
                 .tag(item)
         }
-        .navigationSplitViewColumnWidth(min: 130, ideal: 180)
+        .navigationSplitViewColumnWidth(min: 130, ideal: 180, max: 300)
     }
 }
 
@@ -42,7 +42,7 @@ private extension RootView {
         case .home:
             Text("홈 화면")
         case .experience:
-            Text("경험 화면")
+            KeywordView(viewModel: KeywordViewModel(modelContext: modelContext))
         case .character:
             CharacterView(viewModel: CharacterViewModel(modelContext: modelContext))
         case .none:
