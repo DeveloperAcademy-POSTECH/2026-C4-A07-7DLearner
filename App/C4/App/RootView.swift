@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct RootView: View {
+    @Environment(\.openSettings) private var openSettings
     @Environment(\.modelContext) private var modelContext
     
     @Query private var characters: [Character]
@@ -63,7 +64,7 @@ private extension RootView {
             Spacer()
             
             Button {
-                // 설정 버튼 동작
+                openSettings()
             } label: {
                 Label("설정", systemImage: "gearshape")
             }
