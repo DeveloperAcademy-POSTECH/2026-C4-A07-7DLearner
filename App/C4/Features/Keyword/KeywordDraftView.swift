@@ -103,7 +103,7 @@ struct KeywordDraftView: View {
                                 ForEach(viewModel.draftAttachedFiles) { file in
                                     HStack(spacing: 8) {
                                         Image(systemName: "doc.text")
-                                            .foregroundColor(.blue)
+                                            .foregroundColor(.black)
                                             .font(.system(size: 12))
                                         Text(file.fileName)
                                             .font(Font.custom("SF Pro", size: 13))
