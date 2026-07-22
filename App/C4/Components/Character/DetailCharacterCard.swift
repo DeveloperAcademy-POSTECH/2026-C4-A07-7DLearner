@@ -16,11 +16,9 @@ struct DetailCharacterCard: View {
         
         HStack(alignment: .center, spacing: 10) {
             
-            Image("캐릭터")
-                .resizable()
-                .scaledToFill()
+            RoundedRectangle(cornerRadius: 7)
+                .fill(Color.gray.opacity(0.2))
                 .frame(width: 52, height: 57)
-                .clipShape(RoundedRectangle(cornerRadius: 7))
                 
                 
             VStack(alignment: .leading, spacing: 12) {
@@ -35,12 +33,8 @@ struct DetailCharacterCard: View {
                     ForEach(keywords, id: \.id) { keyword in
                         KeywordTag(text: keyword.name, style: .selected)
                     }
-                    
                 }
-                
             }
-           
-            
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 10)
@@ -51,8 +45,7 @@ struct DetailCharacterCard: View {
             RoundedRectangle(cornerRadius: 15)
                 .stroke(Color(red: 0.46, green: 0.42, blue: 1), lineWidth: 1.2)
         )
-    }
-    
+    }    
 }
 //
 //#Preview {
