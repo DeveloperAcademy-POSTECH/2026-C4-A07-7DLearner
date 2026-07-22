@@ -96,6 +96,14 @@ struct KeywordCreateView: View {
                             .frame(height: 28)
                             .background(Color.gray.opacity(0.1))
                             .cornerRadius(6)
+                            
+                            // 작성된 키워드 태그들
+                            ForEach(viewModel.draftKeywords, id: \.self) { keyword in
+                                KeywordTag(text: keyword, onRemove: {
+                                    viewModel.draftKeywords.removeAll { $0 == keyword }
+                                }, style: .selected)
+                            }
+                            
                         }
                     }
                     .padding(.horizontal, 8)

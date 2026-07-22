@@ -22,10 +22,14 @@ struct KeywordView: View {
         _viewModel = State(initialValue: KeywordViewModel(modelContext: modelContext))
     }
     
+    init(modelContext: ModelContext) {
+        _viewModel = State(initialValue: KeywordViewModel(modelContext: modelContext))
+    }
+    
     var body: some View {
         // MARK: - 리스트 영역
         VStack(spacing: 0) {
-            if viewModel.keywords.isEmpty {
+            if viewModel.keywords.isEmpty && experiences.isEmpty {
                 emptyStateView
             } else {
                 contentListView
@@ -64,8 +68,13 @@ struct KeywordView: View {
                 case .draft:
                     KeywordDraftView(viewModel: viewModel)
                 case .detail:
-                    if let keyword = viewModel.selectedKeyword {
+                    switch viewModel.viewSelection {
+                    case .keyword(let keyword):
                         KeywordDetailView(keyword: keyword, episodes: viewModel.episodesForKeyword(keyword: keyword))
+                    case .experience(let experience):
+                        ExperienceDetailView(experience: experience)
+                    case nil:
+                        Text("선택된 항목이 없습니다.")
                     }
                 case nil:
                     KeywordEmptyView(viewModel: viewModel)
@@ -87,24 +96,28 @@ struct KeywordView: View {
     // MARK: - 리스트 화면
     private var contentListView: some View {
         VStack(spacing: 0) {
-            // 상단 탭
+            // 상단 탭 (ViewModel의 changeTab과 연동)
             HStack(spacing: 0) {
-                Button(action: { selectedTab = "키워드" }) {
+                Button(action: {
+                    viewModel.changeTab(to: "키워드")
+                }) {
                     Text("키워드")
                         .font(Font.custom("SF Pro", size: 13))
                         .frame(width: 361 / 2, height: 24)
-                        .background(selectedTab == "키워드" ? selectedColor : Color.clear)
-                        .foregroundColor(selectedTab == "키워드" ? .white : .black)
+                        .background(viewModel.selectedTab == "키워드" ? selectedColor : Color.clear)
+                        .foregroundColor(viewModel.selectedTab == "키워드" ? .white : .black)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 
-                Button(action: { selectedTab = "경험" }) {
+                Button(action: {
+                    viewModel.changeTab(to: "경험")
+                }) {
                     Text("경험")
                         .font(Font.custom("SF Pro", size: 13))
                         .frame(width: 361 / 2, height: 24)
-                        .background(selectedTab == "경험" ? selectedColor : Color.clear)
-                        .foregroundColor(selectedTab == "경험" ? .white : .black)
+                        .background(viewModel.selectedTab == "경험" ? selectedColor : Color.clear)
+                        .foregroundColor(viewModel.selectedTab == "경험" ? .white : .black)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -114,9 +127,9 @@ struct KeywordView: View {
             .cornerRadius(6)
             .padding(.vertical, 12)
             
-            // 키워드 리스트
-            if selectedTab == "키워드" {
-                List(viewModel.keywords, id: \.id, selection: $viewModel.selectedKeyword) { keyword in
+            // 키워드 및 경험 리스트 분기 처리
+            if viewModel.selectedTab == "키워드" {
+                List(viewModel.keywords, id: \.id, selection: keywordSelection) { keyword in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(keyword.name)
                             .font(Font.custom("SF Pro", size: 15).weight(.semibold))
@@ -130,12 +143,56 @@ struct KeywordView: View {
                 }
                 .listStyle(.plain)
             } else {
-                Spacer()
-                Text("경험 리스트 영역")
-                    .foregroundColor(.gray)
-                Spacer()
+                // 💡 진짜 경험 리스트 (경험 명 + 아래에 바짝 붙은 키워드 태그들)
+                List(experiences, id: \.id, selection: experienceSelection) { experience in
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(experience.title)
+                            .font(Font.custom("SF Pro", size: 15).weight(.semibold))
+                            .foregroundColor(.black)
+                        
+                        HStack(spacing: 2) {
+                            ForEach(experience.keywords, id: \.id) { keyword in
+                                KeywordTag(text: keyword.name, style: .selected)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 8)
+                    .tag(experience)
+                }
+                .listStyle(.plain)
             }
         }
+    }
+    
+    // 리스트 선택 바인딩 헬퍼
+    private var keywordSelection: Binding<Keyword?> {
+        Binding(
+            get: {
+                if case .keyword(let keyword) = viewModel.viewSelection { return keyword }
+                return nil
+            },
+            set: { keyword in
+                if let keyword {
+                    viewModel.viewSelection = .keyword(keyword)
+                    viewModel.currentInspectorScreen = .detail
+                }
+            }
+        )
+    }
+    
+    private var experienceSelection: Binding<Experience?> {
+        Binding(
+            get: {
+                if case .experience(let experience) = viewModel.viewSelection { return experience }
+                return nil
+            },
+            set: { experience in
+                if let experience {
+                    viewModel.viewSelection = .experience(experience)
+                    viewModel.currentInspectorScreen = .detail
+                }
+            }
+        )
     }
     
     // MARK: - 통합 툴바 (상태 기반)
@@ -143,9 +200,7 @@ struct KeywordView: View {
     private var keywordToolbar: some ToolbarContent {
         switch viewModel.currentInspectorScreen {
         case .create:
-            // 생성 화면일 때: X, 임시저장, 분석 버튼
             ToolbarItem(placement: .navigation) {
-                // 좌측 상단 (X 버튼)
                 Button(action: {
                     viewModel.currentInspectorScreen = nil
                 }) {
@@ -157,7 +212,6 @@ struct KeywordView: View {
             }
             
             ToolbarItemGroup(placement: .primaryAction) {
-                // 우측 상단 (임시저장, 분석)
                 Button(action: {
                     // 임시저장 액션
                 }) {
@@ -180,17 +234,24 @@ struct KeywordView: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 16)
                         .frame(height: 28)
-                        .background(Color(red: 0.0, green: 0.48, blue: 1.0)) // mainBlue
+                        .background(Color(red: 0.0, green: 0.48, blue: 1.0))
                         .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
                 .disabled(!viewModel.isDraftReadyToAnalyze)
             }
             
+        case .detail:
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    viewModel.startKeywordCreation()
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+            
         default:
-            // 인스펙터가 닫혀있거나 생성 외 화면일 때
-            if viewModel.keywords.isEmpty {
-                // 데이터 없을 때: 새 키워드 버튼만
+            if viewModel.keywords.isEmpty && experiences.isEmpty {
                 ToolbarItem(placement: .primaryAction) {
                     Button(action: {
                         viewModel.startKeywordCreation()
@@ -252,10 +313,6 @@ struct KeywordView: View {
                             .foregroundColor(.black)
                             .frame(width: 28, height: 28)
                     }
-                    .buttonStyle(.plain)
-                    .background(Color.gray.opacity(0.12))
-                    .clipShape(Circle())
-                    .fixedSize()
                 }
             }
         }
