@@ -137,14 +137,14 @@ struct ExperienceDetailView: View {
                         ForEach(filteredEpisodes) { episode in
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("\(episode.experience.title): \(episode.title)")
-                                    .font(Font.custom("SF Pro", size: 13).weight(.bold))
+                                    .font(Font.custom("SF Pro", size: 16).weight(.bold))
                                     .foregroundColor(.black)
                                 
                                 VStack(alignment: .leading, spacing: 6) {
-                                    DetailTextRow(title: "문제상황", content: episode.problemContext)
-                                    DetailTextRow(title: "고민포인트", content: episode.concernPoint)
-                                    DetailTextRow(title: "나의 액션", content: episode.myAction)
-                                    DetailTextRow(title: "성과 및 배움", content: episode.outcome)
+                                    Text("- 문제상황: \(episode.problemContext)")
+                                    Text("- 고민 포인트: \(episode.concernPoint)")
+                                    Text("- 나의 액션: \(episode.myAction)")
+                                    Text("- 성과 및 배움: \(episode.outcome)")
                                 }
                                 .font(Font.custom("SF Pro", size: 13))
                                 .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))

@@ -136,35 +136,19 @@ struct KeywordDraftView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            ForEach(viewModel.draftKeywords, id: \.self) { keywordName in
-                                let keywordObj = Keyword(name: keywordName)
-                                let experienceObj = Experience(
-                                    title: viewModel.draftExperienceTitle,
-                                    periodStart: .now,
-                                    periodEnd: .now,
-                                    experienceStatement: viewModel.draftStatement
-                                )
-                                // 전달해주신 에피소드 생성 결과 DTO 포맷 구조 반영
-                                let episodeObj = Episode(
-                                    title: "위기 극복 및 역할 분담 소통",
-                                    problemContext: "출시 3주 전 메인 디자이너 하차로 인한 패닉 상황 발생",
-                                    concernPoint: "개발팀과 남은 인원들 간의 업무 분담 혼선",
-                                    myAction: "임시 PM 자처 및 15분 스탠드업 미팅 도입, R&R 재분배",
-                                    outcome: "갈등 없이 프로젝트 정상 궤도 복귀 및 앱스토어 제출 완료",
-                                    sourceExcerpt: "",
-                                    experience: experienceObj,
-                                    keyword: keywordObj,
-                                    attachment: viewModel.draftAttachedFiles.first
-                                )
+                            ForEach(viewModel.generatedKeywords, id: \.id) { keyword in
+                                let filteredEpisodes = viewModel.generatedEpisodes.filter { $0.keyword.id == keyword.id }
                                 
                                 KeywordEpisodeCard(
-                                    keyword: keywordObj,
-                                    episodes: [episodeObj]
+                                    keyword: keyword,
+                                    episodes: filteredEpisodes
                                 )
                                 .onTapGesture {
-                                    selectedEpisodeKeyword = keywordObj
+                                    withAnimation(.spring(response: 0.3)) {
+                                        selectedEpisodeKeyword = keyword
+                                    }
                                 }
-                                .scaleEffect(selectedEpisodeKeyword?.name == keywordObj.name ? 1.02 : 1.0)
+                                .scaleEffect(selectedEpisodeKeyword?.id == keyword.id ? 1.02 : 1.0)
                                 .animation(.spring(response: 0.3), value: selectedEpisodeKeyword)
                             }
                         }
@@ -177,6 +161,8 @@ struct KeywordDraftView: View {
                     Divider()
                         .padding(.vertical, 10)
                     
+                    let filteredEpisodes = viewModel.generatedEpisodes.filter { $0.keyword.id == selectedKeyword.id }
+                    
                     VStack(alignment: .leading, spacing: 16) {
                         HStack(spacing: 6) {
                             Image(systemName: "tag")
@@ -188,26 +174,30 @@ struct KeywordDraftView: View {
                             Text(selectedKeyword.name)
                                 .font(Font.custom("SF Pro", size: 14).weight(.semibold))
                             
-                            Text("1")
+                            Text("\(filteredEpisodes.count)")
                                 .font(.system(size: 10))
                                 .frame(width: 18, height: 18)
                                 .background(RoundedRectangle(cornerRadius: 6).fill(Color.black.opacity(0.1)))
                         }
                         
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("\(viewModel.draftExperienceTitle.isEmpty ? "경험명" : viewModel.draftExperienceTitle): 위기 극복 및 역할 분담 소통")
-                                .font(Font.custom("SF Pro", size: 13).weight(.medium))
-                                .foregroundColor(.black)
-                            
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text("- 문제상황: 출시 3주 전 메인 디자이너 하차로 인한 패닉 상황 발생")
-                                Text("- 고민 포인트: 개발팀과 남은 인원들 간의 업무 분담 혼선")
-                                Text("- 나의 액션: 임시 PM 자처 및 15분 스탠드업 미팅 도입, R&R 재분배")
-                                Text("- 성과 및 배움: 갈등 없이 프로젝트 정상 궤도 복귀 및 앱스토어 제출 완료")
+                        // 실제 AI가 생성한 Episode 데이터 바인딩
+                        ForEach(filteredEpisodes) { episode in
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("\(episode.experience.title): \(episode.title)")
+                                    .font(Font.custom("SF Pro", size: 16).weight(.bold))
+                                    .foregroundColor(.black)
+                                
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text("- 문제상황: \(episode.problemContext)")
+                                    Text("- 고민 포인트: \(episode.concernPoint)")
+                                    Text("- 나의 액션: \(episode.myAction)")
+                                    Text("- 성과 및 배움: \(episode.outcome)")
+                                }
+                                .font(Font.custom("SF Pro", size: 13))
+                                .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
+                                .lineSpacing(4)
                             }
-                            .font(Font.custom("SF Pro", size: 12))
-                            .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
-                            .lineSpacing(4)
+                            .padding(.top, 4)
                         }
                     }
                     .padding(.top, 8)
@@ -216,9 +206,13 @@ struct KeywordDraftView: View {
             .padding(30)
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
+        .onAppear {
+            if selectedEpisodeKeyword == nil {
+                selectedEpisodeKeyword = viewModel.generatedKeywords.first
+            }
+        }
     }
     
-    // MARK: - Title Section
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("상세보기")
@@ -229,6 +223,18 @@ struct KeywordDraftView: View {
         }
     }
 }
+
+// MARK: - Title Section
+private var titleSection: some View {
+    VStack(alignment: .leading, spacing: 6) {
+        Text("상세보기")
+            .font(Font.custom("SF Pro", size: 22).weight(.bold))
+            .foregroundColor(.black)
+        
+        Divider()
+    }
+}
+
 
 // MARK: - Preview
 #Preview {

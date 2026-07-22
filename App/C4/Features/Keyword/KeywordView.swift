@@ -45,9 +45,17 @@ struct KeywordView: View {
                 case .create:
                     KeywordCreateView(viewModel: viewModel)
                 case .loading:
-                    Text("loading")
+                    // 잠시 로딩창 넣엇듬
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                        Text("AI가 에피소드를 분석하고 있어요...")
+                            .font(Font.custom("SF Pro", size: 14))
+                            .foregroundColor(.gray)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 case .draft:
-                    Text("draft")
+                    KeywordDraftView(viewModel: viewModel)
                 case .detail:
                     if let keyword = viewModel.selectedKeyword {
                         KeywordDetailView(keyword: keyword, episodes: viewModel.episodesForKeyword(keyword: keyword))
@@ -143,35 +151,26 @@ struct KeywordView: View {
             
             // 인스펙터 [생성창] 상태일 때
         case .create:
-            ToolbarItem(placement: .cancellationAction) {
-                Button {
-                    viewModel.currentInspectorScreen = nil
-                } label: {
-                    Image(systemName: "xmark")
-                }
-            }
-            
             ToolbarItem(placement: .primaryAction) {
-                HStack(spacing: 12) {
-                    Button {
-                        // 임시저장 액션
-                    } label: {
-                        Text("임시저장")
+                Button {
+                    viewModel.currentInspectorScreen = .loading
+                    Task {
+                        await viewModel.generateEpisodes()
                     }
-                    
-                    Button {
-                        viewModel.currentInspectorScreen = .loading
-                    } label: {
-                        Text("분석")
-                    }
-                    .disabled(!viewModel.isDraftReadyToAnalyze)
+                } label: {
+                    Image(systemName: "chevron.right")
                 }
+                .disabled(!viewModel.isDraftReadyToAnalyze)
             }
             
-            // 인스펙터 [로딩] 상태일 때 (툴바 없음)
+            // 인스펙터 [로딩] 상태일 때 (캐릭터 파트처럼 다음 버튼으로 초안 확인)
         case .loading:
             ToolbarItem(placement: .primaryAction) {
-                EmptyView()
+                Button {
+                    viewModel.currentInspectorScreen = .draft
+                } label: {
+                    Image(systemName: "chevron.right")
+                }
             }
             
             // 인스펙터 [초안창] 상태일 때
@@ -201,7 +200,7 @@ struct KeywordView: View {
                     }
                     
                     Button {
-                        // 저장(완료) 액션
+                        viewModel.fetchKeywords()
                         viewModel.currentInspectorScreen = nil
                     } label: {
                         Text("저장")
@@ -212,37 +211,44 @@ struct KeywordView: View {
             // 인스펙터 [디테일 / 키워드 리스트] 상태일 때
         case .detail:
             ToolbarItem(placement: .cancellationAction) {
-                HStack(spacing: 8) {
-                    Button {
-                        viewModel.startKeywordCreation()
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                    
-                    Button {
-                        // 편집 액션
-                    } label: {
-                        Image(systemName: "pencil")
-                    }
-                }
-            }
-            
-            ToolbarItem(placement: .primaryAction) {
-                HStack(spacing: 12) {
-                    Button {
-                        // 메인뷰 휴지통 액션
-                    } label: {
-                        Image(systemName: "trash")
-                            .foregroundColor(.red)
-                    }
-                    
-                    Button {
-                        // 검색 액션
-                    } label: {
-                        Image(systemName: "magnifyingglass")
-                    }
+                Button {
+                    viewModel.startKeywordCreation()
+                } label: {
+                    Image(systemName: "plus")
                 }
             }
         }
     }
 }
+
+// 인스펙터 [생성창] 상태일 때
+//        case .create:
+//            ToolbarItem(placement: .cancellationAction) {
+//                Button {
+//                    viewModel.currentInspectorScreen = nil
+//                } label: {
+//                    Image(systemName: "xmark")
+//                }
+//            }
+//
+//            ToolbarItem(placement: .primaryAction) {
+//                HStack(spacing: 12) {
+//                    Button {
+//                        // 임시저장 액션
+//                    } label: {
+//                        Text("임시저장")
+//                    }
+//
+//                    Button {
+//                        viewModel.currentInspectorScreen = .loading
+//                        // 비동기로 AI 분석 실행 후, 끝나면 초안창으로 자동 전환
+//                        Task {
+//                            await viewModel.generateEpisodes()
+//                            viewModel.currentInspectorScreen = .draft
+//                        }
+//                    } label: {
+//                        Text("분석")
+//                    }
+//                    .disabled(!viewModel.isDraftReadyToAnalyze)
+//                }
+//            }
