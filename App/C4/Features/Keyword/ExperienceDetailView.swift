@@ -47,24 +47,26 @@ private extension ExperienceDetailView {
     // 1. 헤더 (경험명, 키워드, 기간)
     var headerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
+            Text(experience.title)
+                .font(Font.custom("SF Pro", size: 16).weight(.bold))
+                .foregroundColor(.black)
+            
+            
+            
             HStack(alignment: .center) {
-                Text(experience.title)
-                    .font(Font.custom("SF Pro", size: 16).weight(.bold))
-                    .foregroundColor(.black)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(experience.keywords) { keyword in
+                            KeywordTag(text: keyword.name, style: .selected)
+                        }
+                    }
+                }
                 
                 Spacer()
                 
                 Text("\(experience.periodStart, style: .date) - \(experience.periodEnd, style: .date)")
                     .font(Font.custom("SF Pro", size: 12))
                     .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
-            }
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(experience.keywords) { keyword in
-                        KeywordTag(text: keyword.name, style: .selected)
-                    }
-                }
             }
         }
     }
@@ -78,7 +80,7 @@ private extension ExperienceDetailView {
                 Text("첨부된 자료가 없습니다.")
                     .font(Font.custom("SF Pro", size: 12))
                     .foregroundColor(.gray)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 4)
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
@@ -102,8 +104,8 @@ private extension ExperienceDetailView {
             if activeKeywords.isEmpty {
                 Text("아직 작성된 에피소드가 없습니다.")
                     .font(Font.custom("SF Pro", size: 12))
-                    .foregroundColor(.secondary)
-                    .padding(.vertical, 8)
+                    .foregroundColor(.gray)
+                    .padding(.vertical, 4)
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {

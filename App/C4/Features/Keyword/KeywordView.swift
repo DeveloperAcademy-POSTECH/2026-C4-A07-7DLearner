@@ -77,7 +77,7 @@ struct KeywordView: View {
                     KeywordEmptyView(viewModel: viewModel)
                 }
             }
-            .inspectorColumnWidth(min: 350, ideal: 420, max: 600)
+            .inspectorColumnWidth(min: 600, ideal: 600, max: 700)
         }
     }
     
@@ -129,10 +129,10 @@ struct KeywordView: View {
                 List(viewModel.keywords, id: \.id, selection: keywordSelection) { keyword in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(keyword.name)
-                            .font(Font.custom("SF Pro", size: 15).weight(.semibold))
+                            .font(Font.custom("SF Pro", size: 13).weight(.semibold))
                             .foregroundColor(.black)
                         Text("에피소드 \(keyword.episodes.count)개")
-                            .font(Font.custom("SF Pro", size: 12))
+                            .font(Font.custom("SF Pro", size: 10))
                             .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
                     }
                     .padding(.vertical, 8)
@@ -140,11 +140,10 @@ struct KeywordView: View {
                 }
                 .listStyle(.plain)
             } else {
-                // 💡 진짜 경험 리스트 (경험 명 + 아래에 바짝 붙은 키워드 태그들)
                 List(experiences, id: \.id, selection: experienceSelection) { experience in
                     VStack(alignment: .leading, spacing: 6) {
                         Text(experience.title)
-                            .font(Font.custom("SF Pro", size: 15).weight(.semibold))
+                            .font(Font.custom("SF Pro", size: 13).weight(.semibold))
                             .foregroundColor(.black)
                         
                         HStack(spacing: 2) {
