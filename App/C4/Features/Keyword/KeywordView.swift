@@ -14,9 +14,9 @@ struct KeywordView: View {
     // MARK: ViewModel
     @State private var viewModel: KeywordViewModel
     @Query private var experiences: [Experience]
-    
+
     let selectedColor = Color("selectedColor")
-    
+
     init(modelContext: ModelContext) {
         _viewModel = State(initialValue: KeywordViewModel(modelContext: modelContext))
     }
@@ -31,6 +31,7 @@ struct KeywordView: View {
             }
         }
         .navigationTitle("키워드")
+
         // 상태 기반 통합 툴바
         .toolbar {
             keywordToolbar
@@ -46,6 +47,7 @@ struct KeywordView: View {
         )) {
             Group {
                 switch viewModel.currentInspectorScreen {
+
                 case .empty:
                     KeywordEmptyView(viewModel: viewModel)
                 case .create:
@@ -265,6 +267,7 @@ struct KeywordView: View {
                     .fixedSize()
                 }
             } else {
+
                 ToolbarItem(placement: .navigation) {
                     Button(action: {
                         // 휴지통 액션
@@ -277,7 +280,7 @@ struct KeywordView: View {
                     .clipShape(Circle())
                     .fixedSize()
                 }
-                
+
                 ToolbarItemGroup(placement: .primaryAction) {
                     Button(action: {
                         viewModel.startKeywordCreation()
@@ -295,10 +298,10 @@ struct KeywordView: View {
                     .background(Color.gray.opacity(0.12))
                     .clipShape(Capsule())
                     .fixedSize()
-                    
+
                     Spacer()
                         .frame(width: 120)
-                    
+
                     Button(action: {
                         // 검색 액션
                     }) {

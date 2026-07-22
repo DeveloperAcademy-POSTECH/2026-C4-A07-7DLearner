@@ -23,7 +23,7 @@ struct DraftAttachment: Identifiable, Hashable {
     let fileName: String
     let fileType: String
     let fileSize: Int
-    
+
     var formattedFileSize: String {
         ByteCountFormatter.string(fromByteCount: Int64(fileSize), countStyle: .file)
     }
@@ -31,7 +31,7 @@ struct DraftAttachment: Identifiable, Hashable {
 
 @Observable
 final class KeywordViewModel {
-    
+
     // MARK: - Dependencies
     private let context: ModelContext
     private let keywordRepository: KeywordRepository
@@ -87,8 +87,9 @@ final class KeywordViewModel {
     var draftEndDate: Date = .now
     var draftStatement: String = ""
     var draftKeywords: [String] = []
+
     var draftAttachedFiles: [DraftAttachment] = []
-    
+
     // 분석(생성) 버튼 활성화 조건 — 경험명 + 올바른 기간 + 경험진술 + 키워드 1개 이상
     var isDraftReadyToAnalyze: Bool {
         !draftExperienceTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -96,7 +97,7 @@ final class KeywordViewModel {
         && !draftStatement.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         && !draftKeywords.isEmpty
     }
-    
+
     // MARK: Initializer
     init(modelContext: ModelContext) {
         self.context = modelContext
@@ -105,8 +106,9 @@ final class KeywordViewModel {
         self.episodeGenerationManager = EpisodeGenerationManager(modelContext: modelContext)
         fetchKeywords()
     }
-    
+
     // MARK: - Functions
+
     // 저장된 전체 키워드 조회
     func fetchKeywords() {
         do {
@@ -116,14 +118,13 @@ final class KeywordViewModel {
             print("Keyword 조회 실패: \(error)")
         }
     }
-    
+
     // 특정 키워드와 연결된 에피소드 반환
     func episodesForKeyword(keyword: Keyword) -> [Episode] {
         return keyword.episodes
     }
-    
+
     // MARK: - 생성 폼
-    
     // 새 키워드(경험) 생성 화면 열기 — 이전 draft/결과를 초기화한다.
     func startKeywordCreation() {
         draftExperienceTitle = ""
