@@ -31,9 +31,9 @@ struct CharacterCard: View {
                 .frame(width: 52, height: 57)
                 .clipShape(RoundedRectangle(cornerRadius: 7))
                 
-                
             VStack(alignment: .leading, spacing: 12) {
                 Text(character.title)
+                    .lineLimit(1)
                     .font(
                         Font.custom("SF Pro", size: 12)
                             .weight(.semibold)
@@ -60,9 +60,9 @@ struct CharacterCard: View {
            
             
         }
-        .frame(width: 224, alignment: .leading)
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
+        .frame(width: 224, alignment: .leading)
         .background(Color(red: 0.95, green: 0.95, blue: 0.95))
         .cornerRadius(15)
         .overlay(

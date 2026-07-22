@@ -31,6 +31,7 @@ final class CharacterViewModel {
     var selectedCharacter: Character?
     var allKeywords: [Keyword] = []
     
+    
     // MARK: - Inspector State
     var currentInspectorScreen: InspectorScreen = .empty
     
@@ -118,17 +119,17 @@ final class CharacterViewModel {
     }
     
     // 선택한 Keyword를 기반으로 Draft 생성
-    func generateDraft() {
-        if isDraftReadyToSave {
-            currentInspectorScreen = .loading
-            do {
-                draftEpisodes = try episodeRepository.fetch(keywords: draftKeywords)
-            }
-            catch {
-                print("Episode 조회 실패: \(error)")
-            }
-        }
-    }
+//    func generateDraft() {
+//        if isDraftReadyToSave {
+//            currentInspectorScreen = .loading
+//            do {
+//                draftEpisodes = try episodeRepository.fetch(keywords: draftKeywords)
+//            }
+//            catch {
+//                print("Episode 조회 실패: \(error)")
+//            }
+//        }
+//    }
     
     // MARK: - CharacterLoadingView
     // 임시 - 저장 및 메인화면으로 복귀
@@ -138,7 +139,7 @@ final class CharacterViewModel {
             do {
                 try context.save()
                 selectedCharacter = character
-                currentInspectorScreen = .loading
+                currentInspectorScreen = .detail
 //                isEditing = false
                 
             }

@@ -15,7 +15,7 @@ struct CharacterView: View {
     
     //    @Query(sort: \Character.createdAt, order: .reverse) private var characters: [Character]
         
-    private let columns = [GridItem(.adaptive(minimum: 224))]
+    private let columns = [GridItem(.adaptive(minimum: 224), spacing: 10)]
     
     init(viewModel: CharacterViewModel) {
         self.viewModel = viewModel
@@ -23,13 +23,38 @@ struct CharacterView: View {
     
     var body: some View {
         
+        Group {
+                switch viewModel.currentInspectorScreen {
+                case .create:
+                    SelectedKeywordView(viewModel: viewModel)
+
+                default:
+                    CharacterList
+                }
+            }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .inspector(isPresented: Binding(
+            get: { true },
+            set: { _ in }
+        )
+        ){
+            CharacterInspectorView(viewModel: viewModel)
+        }
+        .toolbar {
+            characterToolbar
+        }
+        
+    }
+    
+    // MARK: - CharacterList
+    private var CharacterList: some View {
         VStack{
             if characters.isEmpty {
                 Text("아직 생성된 캐릭터가 없습니다. + 버튼을 눌러 새로운 캐릭터를 만들어 보세요")
             }
             else {
                 ScrollView {
-                    LazyVGrid(columns: columns, spacing: 10) {
+                    LazyVGrid(columns: columns) {
                         ForEach(characters, id: \.id){ character in
                             CharacterCard(character: character, keywordLimit: 2)
                                 
@@ -42,17 +67,61 @@ struct CharacterView: View {
                 .padding()
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .inspector(isPresented: Binding(
-            get: { true },
-            set: { _ in }
-        )
-        ){
-            CharacterInspectorView(viewModel: viewModel)
+    }
+    
+    
+    // MARK: - SelectedKeywordView
+    private struct SelectedKeywordView: View {
+        
+        @Bindable var viewModel: CharacterViewModel
+        
+        var body: some View {
+            
+    
+                VStack(alignment: .leading, spacing: 6) {
+                    SectionHeader(title: "선택된 키워드", descriptions: "키워드별 에피소드를 확인해보세요!")
+                    
+                    ScrollView {
+
+                        
+                        VStack(alignment: .leading) {
+                            ForEach(viewModel.draftKeywords, id: \.id) { keyword in
+                                
+                                    KeywordEpisodeCard(
+                                        keyword: keyword,
+                                        episodes: keyword.episodes,
+                                        episodeLimit: nil,
+                                        showsSummary: false
+                                    )
+                                    .padding(20)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .fill(Color.white)
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .inset(by: 0.2)
+                                            .stroke(
+                                                Color(red: 0.53, green: 0.53, blue: 0.53),
+                                                lineWidth: 0.4
+                                            )
+                                    )
+                                    .contentShape(Rectangle())
+                        }
+                        
+                            
+                            
+                            
+                        }
+                        
+                    }
+                }
+                .padding(30)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                
+            
         }
-        .toolbar {
-            characterToolbar
-        }
+        
         
     }
     
@@ -155,7 +224,7 @@ struct CharacterView: View {
             ToolbarItem(placement: .primaryAction) {
                 Button {
 
-                    viewModel.currentInspectorScreen = .detail
+//                    viewModel.currentInspectorScreen = .detail
                 } label: {
                     Image(systemName: "chevron.right")
                 }

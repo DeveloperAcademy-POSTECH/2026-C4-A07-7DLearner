@@ -18,7 +18,7 @@ struct CharacterInspectorView: View {
             case .empty: CharacterEmptyView()
             case .create: CharacterCreateView(viewModel: viewModel)
             case .draft: EmptyView()
-            case .loading: CharacterLoadingView(viewModel: viewModel)
+            case .loading: EmptyView()
             case .detail: CharacterDetailView(viewModel: viewModel)
             }
         }
@@ -138,18 +138,22 @@ private struct CharacterCreateView: View {
             
             Group {
                 if viewModel.isEditing {
-                    LazyVGrid(columns: columns, alignment: .leading, spacing: 15) {
-                        
+                    
+                    
+                    HStack {
                         Button {
                             isKeywordPickerExpanded.toggle()
                         } label: {
                             Image(systemName: "plus")
                         }
-                        
-                        ForEach(viewModel.draftKeywords, id: \.id) {keyword in
-                            KeywordTag(text: keyword.name,onRemove: {
-                                viewModel.draftKeywords.removeAll { $0.id == keyword.id }
-                            },style: .selected)
+                        ScrollView(.horizontal) {
+                            HStack(spacing: 10) {
+                                ForEach(viewModel.draftKeywords, id: \.id) { keyword in
+                                    KeywordTag(text: keyword.name,onRemove: {
+                                        viewModel.draftKeywords.removeAll { $0.id == keyword.id }
+                                    },style: .selected)
+                                }
+                            }
                         }
                     }
                     .padding(.horizontal, 12)
@@ -157,37 +161,56 @@ private struct CharacterCreateView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color.gray.opacity(0.08))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
-                    
+    
                     if isKeywordPickerExpanded {
-                        TextField("검색",text: $viewModel.searchText)
-                        
-                        LazyVGrid(columns:columns, alignment: .leading){
-                            ForEach (viewModel.filteredKeywords, id: \.id) {keyword in
-                                Button {
-                                    viewModel.addDraftKeyword(keyword)
-                                    viewModel.searchText = ""
-                                } label: {
-                                    KeywordTag(text: keyword.name, style: .picker)
+                        VStack {
+                            TextField("검색",text: $viewModel.searchText)
+                            
+                            ScrollView(.horizontal) {
+                                HStack(spacing: 10) {
+                                    ForEach (viewModel.filteredKeywords, id: \.id) {keyword in
+                                        Button {
+                                            viewModel.addDraftKeyword(keyword)
+                                            viewModel.searchText = ""
+                                        } label: {
+                                            KeywordTag(text: keyword.name, style: .picker)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                    
                                 }
-                                .buttonStyle(.plain)
                             }
                         }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.gray.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     
                 } else {
-                    LazyVGrid(columns:columns, alignment: .leading, spacing: 15) {
+                    
+                    HStack {
                         Button {
                             isKeywordPickerExpanded.toggle()
                         } label: {
                             Image(systemName: "plus")
                         }
-                        
-                        ForEach (viewModel.draftKeywords, id: \.id) {keyword in
-                            KeywordTag(text: keyword.name, onRemove: {
-                                viewModel.removeDraftKeyword(keyword)
-                            }, style: .selected)
+                        ScrollView(.horizontal) {
+                            HStack(spacing: 10) {
+                                ForEach(viewModel.draftKeywords, id: \.id) { keyword in
+                                    KeywordTag(
+                                        text: keyword.name,
+                                        onRemove: {
+                                            viewModel.removeDraftKeyword(keyword)
+                                        },
+                                        style: .selected
+                                    )
+                                }
+                            }
                         }
                     }
+                    
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -195,93 +218,34 @@ private struct CharacterCreateView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     
                     if isKeywordPickerExpanded {
-                        TextField("검색",text: $viewModel.searchText)
-                        
-                        LazyVGrid(columns:columns, alignment: .leading){
-                            ForEach (viewModel.filteredKeywords, id: \.id) {keyword in
-                                Button {
-                                    viewModel.addDraftKeyword(keyword)
-                                    viewModel.searchText = ""
-                                } label: {
-                                    KeywordTag(text: keyword.name, style: .picker)
+                        VStack {
+                            TextField("검색",text: $viewModel.searchText)
+                            
+                            ScrollView(.horizontal) {
+                                HStack(spacing: 10) {
+                                    ForEach (viewModel.filteredKeywords, id: \.id) {keyword in
+                                        Button {
+                                            viewModel.addDraftKeyword(keyword)
+                                            viewModel.searchText = ""
+                                        } label: {
+                                            KeywordTag(text: keyword.name, style: .picker)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                    
                                 }
-                                .buttonStyle(.plain)
                             }
                         }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.gray.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                 }
                 
             }
         }
-    }
-}
-
-// MARK: - Character Loading View
-private struct CharacterLoadingView: View {
-    
-    @Bindable var viewModel: CharacterViewModel
-    
-    var body: some View {
-        VStack(alignment: .center, spacing: 26) {
-            Rectangle()
-                .foregroundColor(.clear)
-                .frame(width: 138, height: 138)
-                .background(
-                    Image("캐릭터")
-                        .resizable()
-                        .scaledToFit()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 138, height: 138)
-                        .clipped()
-                )
-                .cornerRadius(7)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 7)
-                        .inset(by: 0.5)
-                        .stroke(.black, lineWidth: 1)
-                )
-            
-            Text("자료를 읽고 있어요")
-                .font(
-                    Font.custom("Inter", size: 17)
-                        .weight(.bold)
-                )
-                .foregroundColor(.black)
-                .multilineTextAlignment(.center)
-            
-            Text("자료를 취합하는 중입니다.\n잠시만 기다려 주세요.")
-                .font(Font.custom("SF Pro", size: 17))
-                .foregroundColor(.black)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-            
-            Text("37%")
-                .font(Font.custom("SF Pro", size: 17))
-                .foregroundColor(.black)
-            
-            Image("Line 4")
-                .frame(maxWidth: .infinity)
-                .overlay(
-                    Rectangle()
-                        .stroke(Color(red: 0.79, green: 0.79, blue: 0.79), lineWidth: 10)
-                )
-                .rotationEffect(Angle(degrees: 0.07))
-            
-            Text("텍스트 추출 완료!\n\n키워드 분석 중...\n\n중심 경험 요약 중...\n\n경험 생성 중...")
-                .font(Font.custom("SF Pro", size: 13))
-                .foregroundColor(.black)
-        }
-        .padding(40)
-        
-        .frame(width: 510, height: 701)
-        
-        .background(
-            
-            RoundedRectangle(cornerRadius: 16)
-            
-                .fill(Constants.WindowBackground)
-            
-        )
     }
 }
 
@@ -301,7 +265,6 @@ private struct CharacterDetailView: View {
                     Image("캐릭터")
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                    //                        .scaledToFill()
                         .frame(width: 52, height: 57)
                         .clipShape(RoundedRectangle(cornerRadius: 7))
                     
@@ -366,36 +329,6 @@ private struct CharacterDetailView: View {
         }
     }
 }
-
-// MARK: - OwnedKeywordView
-
-private struct OwnedKeywordView: View {
-    
-    var body: some View {
-        
-        VStack {
-            
-            //보유한 키워드
-            
-            VStack {
-                
-                HStack {
-                    SectionHeader(title: "보유한 키워드", descriptions: "키워드를 선택해 더 많은 에피소드를 관찰해보세요!")
-                    
-                }
-                
-            }
-        
-            //선택된 키워드
-            
-            
-            
-            
-            
-        }
-    }
-}
-
 
 
 
