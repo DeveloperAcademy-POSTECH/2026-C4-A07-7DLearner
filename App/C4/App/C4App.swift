@@ -18,7 +18,8 @@ struct C4App: App {
             Character.self,
             Episode.self,
             Experience.self,
-            Keyword.self
+            Keyword.self,
+            Office.self
         ])
         let configuration = ModelConfiguration(schema: schema)
         
