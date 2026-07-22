@@ -87,6 +87,12 @@ final class CharacterViewModel {
         currentInspectorScreen = .detail
     }
     
+    //캐릭터 삭제
+    func delete(_ character: Character) {
+        context.delete(character)
+        currentInspectorScreen = .empty
+    }
+    
     // MARK: - CharacterCreateView
     // 저장된 전체 Keyword 조회
     func fetchAllKeywords() {

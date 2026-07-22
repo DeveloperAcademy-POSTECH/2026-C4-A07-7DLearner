@@ -20,7 +20,6 @@ struct CharacterInspectorView: View {
             case .draft: EmptyView()
             case .loading: CharacterLoadingView(viewModel: viewModel)
             case .detail: CharacterDetailView(viewModel: viewModel)
-            case nil: EmptyView()
             }
         }
         .inspectorColumnWidth(min: 350, ideal: 420, max: 600)
@@ -80,11 +79,7 @@ private struct CharacterCreateView: View {
                 }
             }
         }
-        
-        
-        
     }
-    
     
     // MARK: Title
     private var titleSection: some View {
@@ -351,7 +346,6 @@ private struct CharacterDetailView: View {
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         selectedKeyword = keyword
-                                        
                                     }
                             }
                         }
@@ -366,18 +360,41 @@ private struct CharacterDetailView: View {
                         .padding(.top, 80)
                     }
                 }
-                
-                
-                
-                
             }
             .padding(30)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            
         }
     }
 }
 
+// MARK: - OwnedKeywordView
+
+private struct OwnedKeywordView: View {
+    
+    var body: some View {
+        
+        VStack {
+            
+            //보유한 키워드
+            
+            VStack {
+                
+                HStack {
+                    SectionHeader(title: "보유한 키워드", descriptions: "키워드를 선택해 더 많은 에피소드를 관찰해보세요!")
+                    
+                }
+                
+            }
+        
+            //선택된 키워드
+            
+            
+            
+            
+            
+        }
+    }
+}
 
 
 

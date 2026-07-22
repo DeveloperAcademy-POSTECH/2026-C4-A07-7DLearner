@@ -20,9 +20,7 @@ struct CharacterCard: View {
             return character.keywords
         }
     }
-    
 
-    
     var body: some View {
         
         HStack(alignment: .center, spacing: 10) {

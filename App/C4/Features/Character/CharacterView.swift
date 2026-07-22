@@ -66,7 +66,7 @@ struct CharacterView: View {
                 Button {
                     viewModel.startCharacterCreation()
                 } label: {
-                    Image(systemName: "plus")
+                    Text("+ 새 캐릭터")
                 }
             }
             
@@ -104,10 +104,10 @@ struct CharacterView: View {
                             
                     }
                     .buttonStyle(.glassProminent)
-                    .tint(.blue)
                     .disabled(!viewModel.isDraftReadyToSave)
                 }
             } else {
+                
                 ToolbarItem(placement: .navigation) {
                     Button {
                         viewModel.currentInspectorScreen = .empty
@@ -166,6 +166,28 @@ struct CharacterView: View {
             }
                         
         case .detail:
+            
+            if let character = viewModel.selectedCharacter {
+                ToolbarItem(placement: .navigation) {
+                    Button {
+                        viewModel.delete(character)
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                }
+            }
+            
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    viewModel.startCharacterCreation()
+                } label: {
+                    Text("+ 새 캐릭터")
+                }
+                .buttonStyle(.glass)
+            }
+            
+            ToolbarSpacer()
+            
             ToolbarItem(placement: .automatic) {
                 Button {
                     viewModel.startEditingCharacter()
