@@ -23,137 +23,12 @@ struct ExperienceDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
-                // MARK: - 헤더 (경험명, 키워드, 기간)
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack(alignment: .center) {
-                        Text(experience.title)
-                            .font(Font.custom("SF Pro", size: 16).weight(.bold))
-                            .foregroundColor(.black)
-                        
-                        Spacer()
-                        
-                        // 기간 (오른쪽 정렬)
-                        Text("\(experience.periodStart, style: .date) - \(experience.periodEnd, style: .date)")
-                            .font(Font.custom("SF Pro", size: 12))
-                            .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
-                    }
-                    
-                    // 경험에 연결된 키워드 태그들 (가로 정렬)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(experience.keywords) { keyword in
-                                KeywordTag(text: keyword.name, style: .selected)
-                            }
-                        }
-                    }
-                }
-                
+                headerSection
                 Divider()
-                
-                // MARK: - 첨부자료
-                VStack(alignment: .leading, spacing: 12) {
-                    SectionHeader(title: "첨부자료")
-                    
-                    if experience.attachments.isEmpty {
-                        Text("첨부된 자료가 없습니다.")
-                            .font(Font.custom("SF Pro", size: 12))
-                            .foregroundColor(.gray)
-                            .padding(.vertical, 8)
-                    } else {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12) {
-                                ForEach(experience.attachments) { attachment in
-                                    AttachmentCardView(attachment: attachment)
-                                }
-                            }
-                        }
-                    }
-                }
-                
+                attachmentSection
                 Divider()
-                
-                // MARK: - 키워드별 에피소드 (가로 스크롤 카드 영역)
-                VStack(alignment: .leading, spacing: 10) {
-                    SectionHeader(
-                        title: "키워드별 에피소드",
-                        descriptions: "선택한 키워드를 기반으로 AI가 분석한 경험이에요."
-                    )
-                    
-                    if activeKeywords.isEmpty {
-                        Text("아직 작성된 에피소드가 없습니다.")
-                            .font(Font.custom("SF Pro", size: 12))
-                            .foregroundColor(.secondary)
-                            .padding(.vertical, 8)
-                    } else {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12) {
-                                ForEach(activeKeywords) { keyword in
-                                    let filteredEpisodes = experience.episodes.filter { $0.keyword.id == keyword.id }
-                                    
-                                    KeywordEpisodeCard(
-                                        keyword: keyword,
-                                        episodes: filteredEpisodes
-                                    )
-                                    .onTapGesture {
-                                        withAnimation(.spring(response: 0.3)) {
-                                            selectedKeyword = keyword
-                                        }
-                                    }
-                                    .scaleEffect(selectedKeyword?.id == keyword.id ? 1.02 : 1.0)
-                                    .animation(.spring(response: 0.3), value: selectedKeyword)
-                                }
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
-                }
-                
-                // MARK: - 선택된 에피소드 상세 내용 하단 표출 영역
-                if let selected = selectedKeyword, activeKeywords.contains(where: { $0.id == selected.id }) {
-                    Divider()
-                        .padding(.vertical, 10)
-                    
-                    let filteredEpisodes = experience.episodes.filter { $0.keyword.id == selected.id }
-                    
-                    VStack(alignment: .leading, spacing: 16) {
-                        // 선택된 키워드 태그 표시
-                        HStack(spacing: 6) {
-                            Image(systemName: "tag")
-                                .font(.system(size: 10))
-                                .foregroundStyle(.blue)
-                                .padding(4)
-                                .background(RoundedRectangle(cornerRadius: 6).fill(Color.blue.opacity(0.25)))
-                            
-                            Text(selected.name)
-                                .font(Font.custom("SF Pro", size: 14).weight(.semibold))
-                            
-                            Text("\(filteredEpisodes.count)")
-                                .font(.system(size: 10))
-                                .frame(width: 18, height: 18)
-                                .background(RoundedRectangle(cornerRadius: 6).fill(Color.black.opacity(0.1)))
-                        }
-                        
-                        // 에피소드 세부 내용 리스트
-                        ForEach(filteredEpisodes) { episode in
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("\(episode.experience.title): \(episode.title)")
-                                    .font(Font.custom("SF Pro", size: 16).weight(.bold))
-                                    .foregroundColor(.black)
-                                
-                                VStack(alignment: .leading, spacing: 6) {
-                                    Text("- 문제상황: \(episode.problemContext)")
-                                    Text("- 고민 포인트: \(episode.concernPoint)")
-                                    Text("- 나의 액션: \(episode.myAction)")
-                                    Text("- 성과 및 배움: \(episode.outcome)")
-                                }
-                                .font(Font.custom("SF Pro", size: 13))
-                                .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
-                                .lineSpacing(4)
-                            }
-                            .padding(.top, 4)
-                        }
-                    }
-                }
+                episodeCardsSection
+                selectedEpisodeDetailSection
             }
             .padding(30)
             .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -161,6 +36,153 @@ struct ExperienceDetailView: View {
         .onAppear {
             if selectedKeyword == nil {
                 selectedKeyword = activeKeywords.first
+            }
+        }
+    }
+}
+
+// MARK: - Subviews for Compiler Optimization
+private extension ExperienceDetailView {
+    
+    // 1. 헤더 (경험명, 키워드, 기간)
+    var headerSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .center) {
+                Text(experience.title)
+                    .font(Font.custom("SF Pro", size: 16).weight(.bold))
+                    .foregroundColor(.black)
+                
+                Spacer()
+                
+                Text("\(experience.periodStart, style: .date) - \(experience.periodEnd, style: .date)")
+                    .font(Font.custom("SF Pro", size: 12))
+                    .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
+            }
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(experience.keywords) { keyword in
+                        KeywordTag(text: keyword.name, style: .selected)
+                    }
+                }
+            }
+        }
+    }
+    
+    // 2. 첨부자료 섹션
+    var attachmentSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "첨부자료")
+            
+            if experience.attachments.isEmpty {
+                Text("첨부된 자료가 없습니다.")
+                    .font(Font.custom("SF Pro", size: 12))
+                    .foregroundColor(.gray)
+                    .padding(.vertical, 8)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(experience.attachments) { attachment in
+                            AttachmentCardView(attachment: attachment)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // 3. 키워드별 에피소드 카드 섹션
+    var episodeCardsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(
+                title: "키워드별 에피소드",
+                descriptions: "선택한 키워드를 기반으로 AI가 분석한 경험이에요."
+            )
+            
+            if activeKeywords.isEmpty {
+                Text("아직 작성된 에피소드가 없습니다.")
+                    .font(Font.custom("SF Pro", size: 12))
+                    .foregroundColor(.secondary)
+                    .padding(.vertical, 8)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(activeKeywords) { keyword in
+                            let filteredEpisodes = experience.episodes.filter { $0.keyword.id == keyword.id }
+                            
+                            KeywordEpisodeCard(
+                                keyword: keyword,
+                                episodes: filteredEpisodes,
+                                episodeLimit: 2,
+                                showsSummary: true
+                            )
+                            .onTapGesture {
+                                withAnimation(.spring(response: 0.3)) {
+                                    selectedKeyword = keyword
+                                }
+                            }
+                            .scaleEffect(selectedKeyword?.id == keyword.id ? 1.02 : 1.0)
+                            .animation(.spring(response: 0.3), value: selectedKeyword)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+        }
+    }
+    
+    // 4. 선택된 에피소드 상세 내용 하단 표출 섹션
+    @ViewBuilder
+    var selectedEpisodeDetailSection: some View {
+        if let selected = selectedKeyword, activeKeywords.contains(where: { $0.id == selected.id }) {
+            let _ = experience.episodes.filter { $0.keyword.id == selected.id }
+            
+            VStack(alignment: .leading, spacing: 0) {
+                Divider()
+                    .padding(.vertical, 10)
+                
+                selectedEpisodeContent(selected: selected)
+            }
+        }
+    }
+    
+    func selectedEpisodeContent(selected: Keyword) -> some View {
+        let filteredEpisodes = experience.episodes.filter { $0.keyword.id == selected.id }
+        
+        return VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 6) {
+                Image(systemName: "tag")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.blue)
+                    .padding(4)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.blue.opacity(0.25)))
+                
+                Text(selected.name)
+                    .font(Font.custom("SF Pro", size: 14).weight(.semibold))
+                
+                Text("\(filteredEpisodes.count)")
+                    .font(.system(size: 10))
+                    .frame(width: 18, height: 18)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.black.opacity(0.1)))
+            }
+            
+            ForEach(filteredEpisodes) { episode in
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("\(episode.experience.title): \(episode.title)")
+                        .font(Font.custom("SF Pro", size: 16).weight(.bold))
+                        .foregroundColor(.black)
+                    
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("- 문제상황: \(episode.problemContext)")
+                        Text("- 고민 포인트: \(episode.concernPoint)")
+                        Text("- 나의 액션: \(episode.myAction)")
+                        Text("- 성과 및 배움: \(episode.outcome)")
+                    }
+                    .font(Font.custom("SF Pro", size: 13))
+                    .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
+                    .lineSpacing(4)
+                }
+                .padding(.top, 4)
             }
         }
     }
@@ -217,12 +239,10 @@ struct DetailTextRow: View {
     
     let context = container.mainContext
     
-    // 1. 가상 키워드 생성
     let keyword1 = Keyword(name: "협업")
     let keyword2 = Keyword(name: "문제해결력")
     let keyword3 = Keyword(name: "자기주도성")
     
-    // 2. 가상 경험 생성
     let experience = Experience(
         title: "애플 디벨로퍼 아카데미 C3",
         periodStart: Date(),
@@ -231,7 +251,6 @@ struct DetailTextRow: View {
     )
     experience.keywords = [keyword1, keyword2, keyword3]
     
-    // 3. 가상 첨부파일 생성
     let attachment1 = Attachment(
         fileName: "계산기 앱.Xcode",
         storedFileName: "calc.swift",
@@ -239,15 +258,7 @@ struct DetailTextRow: View {
         fileSize: 185000,
         experience: experience
     )
-    let attachment2 = Attachment(
-        fileName: "팀원 회고.PDF",
-        storedFileName: "review.pdf",
-        fileType: "PDF 문서",
-        fileSize: 604000,
-        experience: experience
-    )
     
-    // 4. 가상 에피소드 생성
     let episode = Episode(
         title: "디자이너 부재 위기를 넘긴 유연한 역할 분담과 소통",
         problemContext: "출시 3주 전, 메인 디자이너의 하차로 UI 설계가 전면 중단되어 팀 전체가 패닉에 빠졌다.",

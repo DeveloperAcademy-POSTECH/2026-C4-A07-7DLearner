@@ -8,10 +8,6 @@
 import SwiftUI
 import SwiftData
 
-struct Constants {
-    static let GlobalFontSize: CGFloat = 13
-}
-
 struct CharacterCard: View {
     
     let character: Character
@@ -24,16 +20,19 @@ struct CharacterCard: View {
             return character.keywords
         }
     }
-    
+
     var body: some View {
         
         HStack(alignment: .center, spacing: 10) {
             
-            RoundedRectangle(cornerRadius: 7)
-                .fill(Color.white)
+            Image("캐릭터")
+                .resizable()
+                .scaledToFill()
                 .frame(width: 52, height: 57)
-            
-            VStack(alignment: .leading, spacing: 10) {
+                .clipShape(RoundedRectangle(cornerRadius: 7))
+                
+                
+            VStack(alignment: .leading, spacing: 12) {
                 Text(character.title)
                     .font(
                         Font.custom("SF Pro", size: 12)
@@ -58,6 +57,7 @@ struct CharacterCard: View {
                 }
                 
             }
+           
             
         }
         .frame(width: 224, alignment: .leading)
