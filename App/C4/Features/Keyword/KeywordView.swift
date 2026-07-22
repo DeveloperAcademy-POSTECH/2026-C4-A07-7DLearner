@@ -12,10 +12,15 @@ import Foundation
 struct KeywordView: View {
     
     // MARK: ViewModel
-    @Bindable var viewModel: KeywordViewModel
+    // 상위 뷰(RootView)가 리렌더돼도 뷰모델이 재생성되지 않도록 @State로 소유한다.
+    @State private var viewModel: KeywordViewModel
     @State private var selectedTab = "키워드"
-    
+
     let selectedColor = Color("selectedColor")
+
+    init(modelContext: ModelContext) {
+        _viewModel = State(initialValue: KeywordViewModel(modelContext: modelContext))
+    }
     
     var body: some View {
         // MARK: - 리스트 영역
@@ -27,9 +32,9 @@ struct KeywordView: View {
             }
         }
         .navigationTitle("키워드")
-        // 메인 툴바 분기 처리
+        // 상태 기반 통합 툴바 (인스펙터 밖에 두어야 화면 전환 시 인스펙터가 닫히지 않음)
         .toolbar {
-            mainToolbar
+            keywordToolbar
         }
         // MARK: - Inspector
         .inspector(isPresented: Binding(
@@ -47,9 +52,17 @@ struct KeywordView: View {
                 case .create:
                     KeywordCreateView(viewModel: viewModel)
                 case .loading:
-                    Text("loading")
+                    if let experience = viewModel.analysisExperience {
+                        KeywordLoadingView(
+                            experience: experience,
+                            manager: viewModel.episodeGenerationManager,
+                            onComplete: {
+                                viewModel.finishAnalysis()
+                            }
+                        )
+                    }
                 case .draft:
-                    Text("draft")
+                    KeywordDraftView(viewModel: viewModel)
                 case .detail:
                     if let keyword = viewModel.selectedKeyword {
                         KeywordDetailView(keyword: keyword, episodes: viewModel.episodesForKeyword(keyword: keyword))
@@ -59,11 +72,6 @@ struct KeywordView: View {
                 }
             }
             .inspectorColumnWidth(min: 350, ideal: 420, max: 600)
-            
-            // 인스펙터 툴바 분기 처리
-            .toolbar {
-                inspectorToolbar
-            }
         }
     }
     
@@ -130,89 +138,9 @@ struct KeywordView: View {
         }
     }
     
-    // MARK: - 메인 툴바
+    // MARK: - 통합 툴바 (상태 기반)
     @ToolbarContentBuilder
-    private var mainToolbar: some ToolbarContent {
-        if viewModel.keywords.isEmpty {
-            ToolbarItem(placement: .primaryAction) {
-                Button(action: {
-                    viewModel.currentInspectorScreen = .create
-                    viewModel.selectedKeyword = nil
-                }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "plus")
-                        Text("새 키워드")
-                    }
-                    .font(Font.custom("SF Pro", size: 14).weight(.medium))
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 10)
-                    .frame(height: 28)
-                }
-                .buttonStyle(.plain)
-                .clipShape(Capsule())
-                .fixedSize()
-            }
-        } else {
-            // 데이터 있을 때
-            ToolbarItem(placement: .navigation) {
-                Button(action: {
-                    // 휴지통 액션
-                }) {
-                    Image(systemName: "trash")
-                        .font(.system(size: 14))
-                        .frame(width: 36, height: 36)
-                }
-                .buttonStyle(.plain)
-                .clipShape(Circle())
-                .fixedSize()
-            }
-        }
-    }
-    
-    // MARK: - 인스펙터 툴바
-    //    @ToolbarContentBuilder
-    //    private var inspectorToolbar: some ToolbarContent {
-    //        if !viewModel.keywords.isEmpty {
-    //            ToolbarItemGroup(placement: .primaryAction) {
-    //                Button(action: {
-    //                    viewModel.currentInspectorScreen = .create
-    //                    viewModel.selectedKeyword = nil
-    //                }) {
-    //                    // 새 키워드 버튼
-    //                    HStack(spacing: 4) {
-    //                        Image(systemName: "plus")
-    //                        Text("새 키워드")
-    //                    }
-    //                    .font(Font.custom("SF Pro", size: 14).weight(.medium))
-    //                    .foregroundColor(.black)
-    //                    .padding(.horizontal, 10)
-    //                    .frame(height: 36)
-    //                }
-    //                .buttonStyle(.plain)
-    //                .clipShape(Capsule())
-    //                .fixedSize()
-    //
-    //                Spacer()
-    //                    .frame(width: 120)
-    //
-    //                // 돋보기 검색 버튼
-    //                Button(action: {
-    //                    // 검색 액션
-    //                }) {
-    //                    Image(systemName: "magnifyingglass")
-    //                        .font(.system(size: 14))
-    //                        .foregroundColor(.black)
-    //                        .frame(width: 36, height: 36)
-    //                }
-    //                .buttonStyle(.plain)
-    //                .clipShape(Circle())
-    //                .fixedSize()
-    //            }
-    //        }
-    //    }
-    //}
-    @ToolbarContentBuilder
-    private var inspectorToolbar: some ToolbarContent {
+    private var keywordToolbar: some ToolbarContent {
         switch viewModel.currentInspectorScreen {
         case .create:
             // 생성 화면일 때: X, 임시저장, 분석 버튼
@@ -245,7 +173,7 @@ struct KeywordView: View {
                 .buttonStyle(.plain)
                 
                 Button(action: {
-                    viewModel.currentInspectorScreen = .loading
+                    viewModel.startAnalysis()
                 }) {
                     Text("분석")
                         .font(Font.custom("SF Pro", size: 13).weight(.medium))
@@ -256,15 +184,48 @@ struct KeywordView: View {
                         .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
+                .disabled(!viewModel.isDraftReadyToAnalyze)
             }
             
         default:
-            // 기본 상태일 때: 새 키워드, 검색 버튼 표시
-            if !viewModel.keywords.isEmpty {
+            // 인스펙터가 닫혀있거나 생성 외 화면일 때
+            if viewModel.keywords.isEmpty {
+                // 데이터 없을 때: 새 키워드 버튼만
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: {
+                        viewModel.startKeywordCreation()
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus")
+                            Text("새 키워드")
+                        }
+                        .font(Font.custom("SF Pro", size: 14).weight(.medium))
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 10)
+                        .frame(height: 28)
+                    }
+                    .buttonStyle(.plain)
+                    .clipShape(Capsule())
+                    .fixedSize()
+                }
+            } else {
+                // 데이터 있을 때: 휴지통 + 새 키워드 + 검색
+                ToolbarItem(placement: .navigation) {
+                    Button(action: {
+                        // 휴지통 액션
+                    }) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 14))
+                            .frame(width: 36, height: 36)
+                    }
+                    .buttonStyle(.plain)
+                    .clipShape(Circle())
+                    .fixedSize()
+                }
+
                 ToolbarItemGroup(placement: .primaryAction) {
                     Button(action: {
-                        viewModel.currentInspectorScreen = .create
-                        viewModel.selectedKeyword = nil
+                        viewModel.startKeywordCreation()
                     }) {
                         HStack(spacing: 4) {
                             Image(systemName: "plus")
@@ -279,10 +240,10 @@ struct KeywordView: View {
                     .background(Color.gray.opacity(0.12))
                     .clipShape(Capsule())
                     .fixedSize()
-                    
+
                     Spacer()
                         .frame(width: 120)
-                    
+
                     Button(action: {
                         // 검색 액션
                     }) {
