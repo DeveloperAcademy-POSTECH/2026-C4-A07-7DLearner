@@ -12,16 +12,11 @@ import Foundation
 struct KeywordView: View {
     
     // MARK: ViewModel
-    // 상위 뷰(RootView)가 리렌더돼도 뷰모델이 재생성되지 않도록 @State로 소유한다.
     @State private var viewModel: KeywordViewModel
-    @State private var selectedTab = "키워드"
+    @Query private var experiences: [Experience]
 
     let selectedColor = Color("selectedColor")
 
-    init(modelContext: ModelContext) {
-        _viewModel = State(initialValue: KeywordViewModel(modelContext: modelContext))
-    }
-    
     init(modelContext: ModelContext) {
         _viewModel = State(initialValue: KeywordViewModel(modelContext: modelContext))
     }
@@ -36,7 +31,8 @@ struct KeywordView: View {
             }
         }
         .navigationTitle("키워드")
-        // 상태 기반 통합 툴바 (인스펙터 밖에 두어야 화면 전환 시 인스펙터가 닫히지 않음)
+
+        // 상태 기반 통합 툴바
         .toolbar {
             keywordToolbar
         }
@@ -51,7 +47,8 @@ struct KeywordView: View {
         )) {
             Group {
                 switch viewModel.currentInspectorScreen {
-                case.empty:
+
+                case .empty:
                     KeywordEmptyView(viewModel: viewModel)
                 case .create:
                     KeywordCreateView(viewModel: viewModel)
@@ -270,7 +267,7 @@ struct KeywordView: View {
                     .fixedSize()
                 }
             } else {
-                // 데이터 있을 때: 휴지통 + 새 키워드 + 검색
+
                 ToolbarItem(placement: .navigation) {
                     Button(action: {
                         // 휴지통 액션

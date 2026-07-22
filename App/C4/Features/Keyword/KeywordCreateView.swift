@@ -67,13 +67,6 @@ struct KeywordCreateView: View {
 
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
-                            // 작성된 키워드 태그들
-                            ForEach(viewModel.draftKeywords, id: \.self) { keyword in
-                                KeywordTag(text: keyword, onRemove: {
-                                    viewModel.draftKeywords.removeAll { $0 == keyword }
-                                }, style: .selected)
-                            }
-
                             // 새 키워드 입력 필드
                             HStack(spacing: 8) {
                                 Image(systemName: "plus")
