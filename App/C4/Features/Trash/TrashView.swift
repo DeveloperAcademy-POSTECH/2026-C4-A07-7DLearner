@@ -229,7 +229,7 @@ private extension TrashView {
     func characterDetail(_ character: Character) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                CharacterCard(character: character, keywordLimit: nil)
+                CharacterCard(character: character, keywordLimit: nil, isSelected: false)
                 
                 Divider()
                 
