@@ -16,6 +16,7 @@ final class Character {
     
     // MARK: 관계
     @Relationship(inverse: \Keyword.characters) var keywords: [Keyword] = []
+    var offices: [Office] = []
     
     // MARK: 생성자
     init(title: String, characterStatement: String, keywords: [Keyword]/*, createdAt: Date = .now*/) {
