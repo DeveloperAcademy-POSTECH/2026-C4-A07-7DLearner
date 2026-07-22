@@ -32,7 +32,7 @@ final class CharacterViewModel {
     var allKeywords: [Keyword] = []
     
     // MARK: - Inspector State
-    var currentInspectorScreen: InspectorScreen?
+    var currentInspectorScreen: InspectorScreen = .empty
     
     // MARK: - UI State
     var searchText = ""
@@ -132,7 +132,7 @@ final class CharacterViewModel {
             do {
                 try context.save()
                 selectedCharacter = character
-                currentInspectorScreen = .detail
+                currentInspectorScreen = .loading
 //                isEditing = false
                 
             }

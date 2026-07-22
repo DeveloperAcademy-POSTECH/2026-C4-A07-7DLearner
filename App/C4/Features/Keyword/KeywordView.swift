@@ -42,6 +42,8 @@ struct KeywordView: View {
         )) {
             Group {
                 switch viewModel.currentInspectorScreen {
+                case.empty:
+                    KeywordEmptyView(viewModel: viewModel)
                 case .create:
                     KeywordCreateView(viewModel: viewModel)
                 case .loading:

@@ -8,6 +8,7 @@
 import Foundation
 
 enum InspectorScreen {
+    case empty
     case create
     case loading
     case draft

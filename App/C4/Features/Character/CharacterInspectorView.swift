@@ -15,6 +15,7 @@ struct CharacterInspectorView: View {
         
         Group {
             switch viewModel.currentInspectorScreen {
+            case .empty: CharacterEmptyView()
             case .create: CharacterCreateView(viewModel: viewModel)
             case .draft: EmptyView()
             case .loading: CharacterLoadingView(viewModel: viewModel)
@@ -25,6 +26,13 @@ struct CharacterInspectorView: View {
         .inspectorColumnWidth(min: 350, ideal: 420, max: 600)
     }
 }
+
+private struct CharacterEmptyView: View {
+    var body: some View {
+        Text("캐릭터를 선택하세요")
+    }
+}
+
 
 // MARK: - Character Create View
 private struct CharacterCreateView: View {

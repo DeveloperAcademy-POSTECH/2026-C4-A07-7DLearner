@@ -10,7 +10,7 @@ import SwiftData
 
 struct CharacterView: View {
     
-    @Bindable private var viewModel: CharacterViewModel
+    @State private var viewModel: CharacterViewModel
     @Query private var characters: [Character]
     
     //    @Query(sort: \Character.createdAt, order: .reverse) private var characters: [Character]
@@ -44,14 +44,8 @@ struct CharacterView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .inspector(isPresented: Binding(
-            get: {
-                viewModel.isInspectorPresented
-            },
-            set: { isPresented in
-                if !isPresented {
-                    viewModel.currentInspectorScreen = nil
-                }
-            }
+            get: { true },
+            set: { _ in }
         )
         ){
             CharacterInspectorView(viewModel: viewModel)
@@ -66,7 +60,8 @@ struct CharacterView: View {
     @ToolbarContentBuilder
     private var characterToolbar: some ToolbarContent {
         switch viewModel.currentInspectorScreen {
-        case nil:
+            
+        case.empty:
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     viewModel.startCharacterCreation()
@@ -115,7 +110,7 @@ struct CharacterView: View {
             } else {
                 ToolbarItem(placement: .navigation) {
                     Button {
-                        viewModel.currentInspectorScreen = nil
+                        viewModel.currentInspectorScreen = .empty
                     } label: {
                         Image(systemName: "xmark")
                     }
@@ -140,7 +135,7 @@ struct CharacterView: View {
                 
                 ToolbarItem(placement: .primaryAction) {
                     Button {
-                        viewModel.generateDraft()
+                        viewModel.completeCharacterGeneration()
                     } label: {
                         Text("분석")
                             .font(
@@ -159,7 +154,8 @@ struct CharacterView: View {
         case .loading:
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    viewModel.completeCharacterGeneration()
+
+                    viewModel.currentInspectorScreen = .detail
                 } label: {
                     Image(systemName: "chevron.right")
                 }
