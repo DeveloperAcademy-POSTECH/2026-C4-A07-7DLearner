@@ -23,7 +23,7 @@ struct DraftAttachment: Identifiable, Hashable {
     let fileName: String
     let fileType: String
     let fileSize: Int
-    
+
     var formattedFileSize: String {
         ByteCountFormatter.string(fromByteCount: Int64(fileSize), countStyle: .file)
     }
@@ -31,7 +31,7 @@ struct DraftAttachment: Identifiable, Hashable {
 
 @Observable
 final class KeywordViewModel {
-    
+
     // MARK: - Dependencies
     private let context: ModelContext
     private let keywordRepository: KeywordRepository
@@ -75,20 +75,33 @@ final class KeywordViewModel {
         }
     }
     
+
+    // MARK: State
+    var keywords: [Keyword] = []
+    var selectedKeyword: Keyword?
+
+    // MARK: Loading State
+    // 로딩 화면(KeywordLoadingView)에 넘길, 현재 분석 중인 경험
+    var analysisExperience: Experience?
+
+    // KeywordDraftView에서 참조하는 AI 분석 결과
+    var generatedKeywords: [Keyword] = []
+    var generatedEpisodes: [Episode] = []
+
     // MARK: Inspector State
     var currentInspectorScreen: InspectorScreen?
     var isInspectorPresented: Bool {
         currentInspectorScreen != nil
-    }
-    
+    }    
+
     // MARK: Draft State (생성 폼 입력값)
     var draftExperienceTitle: String = ""
     var draftStartDate: Date = .now
     var draftEndDate: Date = .now
     var draftStatement: String = ""
     var draftKeywords: [String] = []
-    var draftAttachedFiles: [DraftAttachment] = []
-    
+    var draftAttachedFiles: [DraftAttachment] = []    
+
     // 분석(생성) 버튼 활성화 조건 — 경험명 + 올바른 기간 + 경험진술 + 키워드 1개 이상
     var isDraftReadyToAnalyze: Bool {
         !draftExperienceTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -96,7 +109,7 @@ final class KeywordViewModel {
         && !draftStatement.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         && !draftKeywords.isEmpty
     }
-    
+
     // MARK: Initializer
     init(modelContext: ModelContext) {
         self.context = modelContext
@@ -105,8 +118,9 @@ final class KeywordViewModel {
         self.episodeGenerationManager = EpisodeGenerationManager(modelContext: modelContext)
         fetchKeywords()
     }
-    
+
     // MARK: - Functions
+
     // 저장된 전체 키워드 조회
     func fetchKeywords() {
         do {
@@ -116,14 +130,14 @@ final class KeywordViewModel {
             print("Keyword 조회 실패: \(error)")
         }
     }
-    
+
     // 특정 키워드와 연결된 에피소드 반환
     func episodesForKeyword(keyword: Keyword) -> [Episode] {
         return keyword.episodes
     }
-    
+
     // MARK: - 생성 폼
-    
+
     // 새 키워드(경험) 생성 화면 열기 — 이전 draft/결과를 초기화한다.
     func startKeywordCreation() {
         draftExperienceTitle = ""
@@ -187,6 +201,61 @@ final class KeywordViewModel {
         currentInspectorScreen = .loading
     }
     
+
+        generatedKeywords = []
+        generatedEpisodes = []
+        analysisExperience = nil
+
+        selectedKeyword = nil
+        currentInspectorScreen = .create
+    }
+
+    // draft 입력값으로 Experience를 생성/저장하고 로딩 화면으로 전환한다.
+    // 실제 Claude API 호출은 KeywordLoadingView가 담당한다.
+    func startAnalysis() {
+        guard isDraftReadyToAnalyze else { return }
+
+        // 1. 키워드 객체 생성/매핑 (중복은 findOrCreate에서 방지)
+        var realKeywords: [Keyword] = []
+        for name in draftKeywords {
+            let trimmed = name.trimmingCharacters(in: .whitespaces)
+            guard !trimmed.isEmpty else { continue }
+            if let keyword = try? keywordRepository.findOrCreate(name: trimmed) {
+                realKeywords.append(keyword)
+            }
+        }
+        generatedKeywords = realKeywords
+
+        // 2. Experience 생성
+        let experience = experienceRepository.create(
+            title: draftExperienceTitle,
+            periodStart: draftStartDate,
+            periodEnd: draftEndDate,
+            experienceStatement: draftStatement
+        )
+        experience.keywords = realKeywords
+
+        // 3. 첨부파일 복사 + 텍스트 추출 후 Experience에 연결
+        //    (fileImporter에서 얻은 보안 스코프 URL이므로 접근 권한을 다시 확보한다.)
+        for file in draftAttachedFiles {
+            let gotAccess = file.url.startAccessingSecurityScopedResource()
+            defer {
+                if gotAccess { file.url.stopAccessingSecurityScopedResource() }
+            }
+            episodeGenerationManager.addAttachment(from: file.url, to: experience)
+        }
+
+        // 4. 저장 후 로딩 화면으로 전환
+        do {
+            try context.save()
+        } catch {
+            print("경험 저장 실패: \(error)")
+        }
+
+        analysisExperience = experience
+        currentInspectorScreen = .loading
+    }
+
     // 로딩(생성) 완료 후 호출 — 결과 반영 및 다음 화면 전환
     func finishAnalysis() {
         if let experience = analysisExperience {
