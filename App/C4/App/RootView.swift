@@ -81,7 +81,7 @@ private extension RootView {
     var detailContent: some View {
         switch selection {
         case .keyword:
-            KeywordView(viewModel: KeywordViewModel(modelContext: modelContext))
+            KeywordView(modelContext: modelContext)
         case .character:
             CharacterView(viewModel: CharacterViewModel(modelContext: modelContext))
         case .office:
