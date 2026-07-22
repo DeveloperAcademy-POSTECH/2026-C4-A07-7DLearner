@@ -89,7 +89,7 @@ private extension RootView {
         case .draft:
             Text("임시저장 화면")
         case .trash:
-            Text("휴지통 화면")
+            TrashView(modelContext: modelContext)
         case .none:
             Text("사이드바에서 항목을 선택하세요")
         }
