@@ -31,7 +31,6 @@ final class CharacterViewModel {
     var selectedCharacter: Character?
     var allKeywords: [Keyword] = []
     
-    
     // MARK: - Inspector State
     var currentInspectorScreen: InspectorScreen = .empty
     
@@ -50,10 +49,6 @@ final class CharacterViewModel {
             }
     }
     
-    var isInspectorPresented: Bool {
-        currentInspectorScreen != nil
-    }
-    
     var isDraftReadyToSave: Bool {
         !draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         && !draftKeywords.isEmpty && !draftCharacterStatement.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -68,7 +63,6 @@ final class CharacterViewModel {
     }
     
     // MARK: Functions
-    
     // MARK: - CharacterView
     // 새로운 Character 생성 시작
     func startCharacterCreation() {
@@ -118,19 +112,6 @@ final class CharacterViewModel {
         draftEpisodes.removeAll { $0.keyword.id == keyword.id }
     }
     
-    // 선택한 Keyword를 기반으로 Draft 생성
-//    func generateDraft() {
-//        if isDraftReadyToSave {
-//            currentInspectorScreen = .loading
-//            do {
-//                draftEpisodes = try episodeRepository.fetch(keywords: draftKeywords)
-//            }
-//            catch {
-//                print("Episode 조회 실패: \(error)")
-//            }
-//        }
-//    }
-    
     // MARK: - CharacterLoadingView
     // 임시 - 저장 및 메인화면으로 복귀
     func completeCharacterGeneration() {
@@ -140,8 +121,6 @@ final class CharacterViewModel {
                 try context.save()
                 selectedCharacter = character
                 currentInspectorScreen = .detail
-//                isEditing = false
-                
             }
             catch {
                 print("캐릭터 생성 실패")
@@ -151,7 +130,6 @@ final class CharacterViewModel {
     
     // MARK: - CharacterDetailView
     // Draft 편집 모드 활성화
-
     func startEditingCharacter() {
         guard let character = selectedCharacter else { return }
 

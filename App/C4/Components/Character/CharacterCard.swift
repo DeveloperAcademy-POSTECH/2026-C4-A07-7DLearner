@@ -12,6 +12,7 @@ struct CharacterCard: View {
     
     let character: Character
     let keywordLimit: Int?
+    let isSelected: Bool
     
     private var displayedKeywords: [Keyword] {
         if let keywordLimit {
@@ -25,11 +26,9 @@ struct CharacterCard: View {
         
         HStack(alignment: .center, spacing: 10) {
             
-            Image("캐릭터")
-                .resizable()
-                .scaledToFill()
+            RoundedRectangle(cornerRadius: 7)
+                .fill(Color.gray.opacity(0.2))
                 .frame(width: 52, height: 57)
-                .clipShape(RoundedRectangle(cornerRadius: 7))
                 
             VStack(alignment: .leading, spacing: 12) {
                 Text(character.title)
@@ -63,11 +62,15 @@ struct CharacterCard: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .frame(width: 224, alignment: .leading)
-        .background(Color(red: 0.95, green: 0.95, blue: 0.95))
+        .background(
+            isSelected ? Color(red: 0.87, green: 0.86, blue: 1) : Color(red: 0.95, green: 0.95, blue: 0.95)
+            )
         .cornerRadius(15)
         .overlay(
             RoundedRectangle(cornerRadius: 15)
-                .stroke(Color.gray, lineWidth: 1.2)
+                .stroke(
+                    isSelected ? Color(red: 0.46, green: 0.42, blue: 1) : Color.gray
+                    , lineWidth: 1.2)
         )
     }
     

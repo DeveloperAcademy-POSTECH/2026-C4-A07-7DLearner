@@ -22,13 +22,13 @@ struct CharacterInspectorView: View {
             case .detail: CharacterDetailView(viewModel: viewModel)
             }
         }
-        .inspectorColumnWidth(min: 350, ideal: 420, max: 600)
+        .inspectorColumnWidth(min: 600, ideal: 600, max: 700)
     }
 }
 
 private struct CharacterEmptyView: View {
     var body: some View {
-        Text("캐릭터를 선택하세요")
+        Text("캐릭터를 선택하거나 새로운 캐릭터를 만들어보세요")
     }
 }
 
@@ -58,8 +58,9 @@ private struct CharacterCreateView: View {
                 .padding(.bottom, 48)
             keywordSection
         }
-        .padding(.horizontal, 30)
-        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(30)
+        .padding(.top, 50)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
     
     // MARK: characterCard
@@ -134,11 +135,10 @@ private struct CharacterCreateView: View {
     // MARK: Keyword
     private var keywordSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            SectionHeader(title: "키워드 선택", descriptions: "이 캐릭터를 가장 잘 나타내는 핵심 키워드를 1개 이상 선택해주세요.\n선택한 키워드와 연결된 경험을 모아 캐릭터를 구성합니다.")
+            SectionHeader(title: "키워드 선택", descriptions: "이 캐릭터를 가장 잘 나타내는 핵심 키워드를 1개 이상 선택해주세요.")
             
             Group {
                 if viewModel.isEditing {
-                    
                     
                     HStack {
                         Button {
@@ -210,7 +210,6 @@ private struct CharacterCreateView: View {
                             }
                         }
                     }
-                    
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -262,11 +261,9 @@ private struct CharacterDetailView: View {
             
             VStack(alignment: .leading, spacing: 28) {
                 HStack(alignment: .top, spacing: 10) {
-                    Image("캐릭터")
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
+                    RoundedRectangle(cornerRadius: 7)
+                        .fill(Color.gray.opacity(0.2))
                         .frame(width: 52, height: 57)
-                        .clipShape(RoundedRectangle(cornerRadius: 7))
                     
                     VStack(alignment:.leading, spacing: 12){
                         Text(character.title)
@@ -320,12 +317,13 @@ private struct CharacterDetailView: View {
                         ScrollView {
                             KeywordEpisodeCard(keyword: selectedKeyword, episodes: selectedKeyword.episodes, episodeLimit: nil, showsSummary: false)
                         }
-                        .padding(.top, 80)
+                        .padding(.top, 50)
                     }
                 }
             }
             .padding(30)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .padding(.top, 50)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }
 }
