@@ -271,7 +271,7 @@ struct KeywordCreateView: View {
                         TextEditor(text: $viewModel.draftStatement)
                             .font(Font.custom("SF Pro", size: 14))
                             .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
+                            .padding(.vertical, 16)
                             .scrollContentBackground(.hidden)
                             .background(Color.clear)
                     }

@@ -51,8 +51,6 @@ private extension ExperienceDetailView {
                 .font(Font.custom("SF Pro", size: 16).weight(.bold))
                 .foregroundColor(.black)
             
-            
-            
             HStack(alignment: .center) {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
@@ -118,6 +116,18 @@ private extension ExperienceDetailView {
                                 episodeLimit: 2,
                                 showsSummary: true
                             )
+                            .padding(20)
+                            .frame(width: 230, alignment: .topLeading)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(selectedKeyword?.id == keyword.id ? Color(red: 0.95, green: 0.95, blue: 0.95) : Color.white)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .inset(by: 0.2)
+                                    .stroke(Color(red: 0.53, green: 0.53, blue: 0.53), lineWidth: 0.4)
+                            )
+                            .contentShape(Rectangle())
                             .onTapGesture {
                                 withAnimation(.spring(response: 0.3)) {
                                     selectedKeyword = keyword
@@ -141,7 +151,7 @@ private extension ExperienceDetailView {
             
             VStack(alignment: .leading, spacing: 0) {
                 Divider()
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 30)
                 
                 selectedEpisodeContent(selected: selected)
             }
@@ -169,24 +179,33 @@ private extension ExperienceDetailView {
             }
             
             ForEach(filteredEpisodes) { episode in
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("\(episode.experience.title): \(episode.title)")
-                        .font(Font.custom("SF Pro", size: 16).weight(.bold))
-                        .foregroundColor(.black)
-                    
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("- 문제상황: \(episode.problemContext)")
-                        Text("- 고민 포인트: \(episode.concernPoint)")
-                        Text("- 나의 액션: \(episode.myAction)")
-                        Text("- 성과 및 배움: \(episode.outcome)")
-                    }
-                    .font(Font.custom("SF Pro", size: 13))
-                    .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
-                    .lineSpacing(4)
-                }
-                .padding(.top, 4)
+                episodeBullets(episode)
             }
         }
+    }
+    
+    func episodeBullets(_ episode: Episode) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("\(episode.experience.title): \(episode.title)")
+                .font(.body.weight(.bold))
+                .foregroundColor(.black)
+            
+            bulletRow(label: "문제 상황", content: episode.problemContext)
+            bulletRow(label: "고민 포인트", content: episode.concernPoint)
+            bulletRow(label: "나의 액션", content: episode.myAction)
+            bulletRow(label: "성과 및 배움", content: episode.outcome)
+        }
+        .padding(.top, 4)
+    }
+    
+    func bulletRow(label: String, content: String) -> some View {
+        HStack(alignment: .top, spacing: 4) {
+            Text("•")
+            Text("\(label):").fontWeight(.semibold)
+            Text(content)
+        }
+        .font(.callout)
+        .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
     }
 }
 
@@ -214,21 +233,8 @@ struct AttachmentCardView: View {
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
+                .stroke(Color.gray.opacity(0.5), lineWidth: 0.4)
         )
-    }
-}
-
-struct DetailTextRow: View {
-    let title: String
-    let content: String
-    
-    var body: some View {
-        HStack(alignment: .top, spacing: 4) {
-            Text("•")
-            Text("\(title):").bold()
-            Text(content)
-        }
     }
 }
 
