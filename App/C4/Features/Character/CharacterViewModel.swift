@@ -32,11 +32,11 @@ final class CharacterViewModel {
     var allKeywords: [Keyword] = []
     
     // MARK: - Inspector State
-    var currentInspectorScreen: InspectorScreen?
+    var currentInspectorScreen: InspectorScreen = .empty
     
     // MARK: - UI State
     var searchText = ""
-    var isEditingDraft: Bool = false
+    var isEditing: Bool = false
     
     // MARK: Computed Properties
     var filteredKeywords: [Keyword] {
@@ -55,7 +55,7 @@ final class CharacterViewModel {
     
     var isDraftReadyToSave: Bool {
         !draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        && !draftKeywords.isEmpty
+        && !draftKeywords.isEmpty && !draftCharacterStatement.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
     // MARK: Initializer
@@ -71,13 +71,13 @@ final class CharacterViewModel {
     // MARK: - CharacterView
     // 새로운 Character 생성 시작
     func startCharacterCreation() {
+        isEditing = false
         draftTitle = ""
         draftCharacterStatement = ""
         draftKeywords = []
         draftEpisodes = []
         selectedCharacter = nil
         currentInspectorScreen = .create
-        isEditingDraft = false
         fetchAllKeywords()
     }
         
@@ -85,6 +85,12 @@ final class CharacterViewModel {
     func selectCharacter(_ character: Character) {
         selectedCharacter = character
         currentInspectorScreen = .detail
+    }
+    
+    //캐릭터 삭제
+    func delete(_ character: Character) {
+        context.delete(character)
+        currentInspectorScreen = .empty
     }
     
     // MARK: - CharacterCreateView
@@ -125,31 +131,55 @@ final class CharacterViewModel {
     }
     
     // MARK: - CharacterLoadingView
-    // Draft 화면으로 이동
-    func showDraft() {
-        currentInspectorScreen = .draft
-    }
-    
-    // MARK: - CharacterDraftView
-    // Draft 편집 모드 활성화
-    func enableDraftEditing() {
-        isEditingDraft = true
-    }
-    
-    // Character 저장 및 생성
-    func createCharacter() {
+    // 임시 - 저장 및 메인화면으로 복귀
+    func completeCharacterGeneration() {
         if isDraftReadyToSave {
-            _ = characterRepository.create(title: draftTitle, characterStatement: draftCharacterStatement, keywords: draftKeywords)
+            let character = characterRepository.create(title: draftTitle, characterStatement: draftCharacterStatement, keywords: draftKeywords)
             do {
                 try context.save()
-                currentInspectorScreen = nil
-                isEditingDraft = false
+                selectedCharacter = character
+                currentInspectorScreen = .loading
+//                isEditing = false
+                
             }
             catch {
                 print("캐릭터 생성 실패")
             }
         }
     }
+    
+    // MARK: - CharacterDetailView
+    // Draft 편집 모드 활성화
+
+    func startEditingCharacter() {
+        guard let character = selectedCharacter else { return }
+
+        draftTitle = character.title
+        draftCharacterStatement = character.characterStatement
+        draftKeywords = character.keywords
+        draftEpisodes = character.episodes
+
+        fetchAllKeywords()
+        
+        isEditing = true
+        currentInspectorScreen = .create
+    }
+    
+    func saveEditedCharacter() {
+        guard let character = selectedCharacter else { return }
+        character.title = draftTitle
+        character.characterStatement = draftCharacterStatement
+        character.keywords = draftKeywords
+        do {
+            try context.save()
+            
+            currentInspectorScreen = .detail
+            isEditing = false
+        } catch {
+            print("캐릭터 수정 실패")
+        }
+    }
+    
     
     // MARK: - Helper Methods
     // 선택한 Keyword에 해당하는 Episode 반환

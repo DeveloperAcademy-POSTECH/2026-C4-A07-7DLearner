@@ -10,7 +10,7 @@ import SwiftData
 
 struct CharacterView: View {
     
-    @Bindable private var viewModel: CharacterViewModel
+    @State private var viewModel: CharacterViewModel
     @Query private var characters: [Character]
     
     //    @Query(sort: \Character.createdAt, order: .reverse) private var characters: [Character]
@@ -32,6 +32,7 @@ struct CharacterView: View {
                     LazyVGrid(columns: columns, spacing: 10) {
                         ForEach(characters, id: \.id){ character in
                             CharacterCard(character: character, keywordLimit: 2)
+                                
                                 .onTapGesture {
                                     viewModel.selectCharacter(character)
                                 }
@@ -43,14 +44,8 @@ struct CharacterView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .inspector(isPresented: Binding(
-            get: {
-                viewModel.isInspectorPresented
-            },
-            set: { isPresented in
-                if !isPresented {
-                    viewModel.currentInspectorScreen = nil
-                }
-            }
+            get: { true },
+            set: { _ in }
         )
         ){
             CharacterInspectorView(viewModel: viewModel)
@@ -65,63 +60,141 @@ struct CharacterView: View {
     @ToolbarContentBuilder
     private var characterToolbar: some ToolbarContent {
         switch viewModel.currentInspectorScreen {
-        case nil:
+            
+        case.empty:
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     viewModel.startCharacterCreation()
                 } label: {
-                    Image(systemName: "plus")
+                    Text("+ 새 캐릭터")
                 }
             }
             
         case .create:
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    viewModel.generateDraft()
-                } label: {
-                    Image(systemName: "chevron.right")
+            
+            if viewModel.isEditing {
+                
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        viewModel.currentInspectorScreen = .detail
+                    } label: {
+                        Text("취소")
+                            .font(
+                            Font.custom("SF Pro", size: 13)
+                            .weight(.medium)
+                            )
+                            .foregroundColor(Constants.LabelsVibrantUsePlusLighterDarkerPrimary)
+                            
+                    }
+                    .buttonStyle(.glass)
                 }
-                .disabled(!viewModel.isDraftReadyToSave)
+                
+                ToolbarSpacer()
+                
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        viewModel.saveEditedCharacter()
+                    } label: {
+                        Text("저장")
+                            .font(
+                            Font.custom("SF Pro", size: 13)
+                            .weight(.medium)
+                            )
+                            .foregroundColor(Constants.LabelsWhite)
+                            
+                    }
+                    .buttonStyle(.glassProminent)
+                    .disabled(!viewModel.isDraftReadyToSave)
+                }
+            } else {
+                
+                ToolbarItem(placement: .navigation) {
+                    Button {
+                        viewModel.currentInspectorScreen = .empty
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .buttonStyle(.glass)
+                }
+                
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        //action
+                    } label: {
+                        Text("임시저장")
+                            .font(
+                            Font.custom("SF Pro", size: 13)
+                            .weight(.medium)
+                            )
+                            .foregroundColor(Constants.LabelsVibrantUsePlusLighterDarkerPrimary)
+                    }
+                    .buttonStyle(.glass)
+                }
+                
+                ToolbarSpacer()
+                
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        viewModel.completeCharacterGeneration()
+                    } label: {
+                        Text("분석")
+                            .font(
+                            Font.custom("SF Pro", size: 13)
+                            .weight(.medium)
+                            )
+                            .foregroundColor(Constants.LabelsWhite)
+                            
+                    }
+                    .buttonStyle(.glassProminent)
+                    .tint(.blue)
+                    .disabled(!viewModel.isDraftReadyToSave)
+                }
             }
             
         case .loading:
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    viewModel.showDraft()
+
+                    viewModel.currentInspectorScreen = .detail
                 } label: {
                     Image(systemName: "chevron.right")
                 }
             }
-            
         case .draft:
-            ToolbarItem(placement: .primaryAction) {
+            ToolbarItem(placement: .automatic) {
                 
-                if !viewModel.isEditingDraft {
+            }
+                        
+        case .detail:
+            
+            if let character = viewModel.selectedCharacter {
+                ToolbarItem(placement: .navigation) {
                     Button {
-                        viewModel.enableDraftEditing()
+                        viewModel.delete(character)
                     } label: {
-                        Image(systemName: "pencil")
+                        Image(systemName: "trash")
                     }
                 }
             }
             
-            ToolbarSpacer(.flexible)
-            
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    viewModel.createCharacter()
-                } label: {
-                    Image(systemName: "checkmark")
-                }
-            }
-            
-        case .detail:
             ToolbarItem(placement: .automatic) {
                 Button {
-                    //action
+                    viewModel.startCharacterCreation()
                 } label: {
-                    Text("...")
+                    Text("+ 새 캐릭터")
                 }
+                .buttonStyle(.glass)
+            }
+            
+            ToolbarSpacer()
+            
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    viewModel.startEditingCharacter()
+                } label: {
+                    Text("편집")
+                }
+                .buttonStyle(.glass)
             }
         }
         

@@ -13,7 +13,7 @@ struct CustomTextField: View {
     @Binding var text: String
     
     var body: some View {
-        TextField(placeholder, text: $text)
+        TextField(placeholder, text: $text, axis: .vertical)
             .textFieldStyle(.plain)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
