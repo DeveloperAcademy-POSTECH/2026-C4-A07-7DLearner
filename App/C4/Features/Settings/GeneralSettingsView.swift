@@ -20,6 +20,11 @@ struct GeneralSettingsView: View {
         }
         .disabled(isSeeding)
         .frame(width: 500, height: 300)
+        
+        Button("모든 데이터 삭제") {
+            Task { await deleteData() }
+        }
+        .frame(width: 500, height: 300)
     }
     
 }
@@ -31,6 +36,11 @@ private extension GeneralSettingsView {
         isSeeding = true
         await MockDataSeeder.seedAll(modelContext: modelContext)
         isSeeding = false
+    }
+    
+    @MainActor
+    func deleteData() async {
+        await MockDataSeeder.deleteAll(modelContext: modelContext)
     }
     
 }

@@ -96,7 +96,15 @@ private extension WanderingAvatar {
     
     // 캐릭터의 이미지를 받아와서 Avatar 이미지로 사용
     func avatarImage(for character: Character) -> some View {
-        Image(systemName: "person.crop.circle.fill")
+        ZStack {
+            Image(character.bodyAssetName)
+                .resizable()
+                .scaledToFit()
+            Image(character.headAssetName)
+                .resizable()
+                .scaledToFit()
+        }
+        .frame(width: 100, height: 100)
     }
     
 }

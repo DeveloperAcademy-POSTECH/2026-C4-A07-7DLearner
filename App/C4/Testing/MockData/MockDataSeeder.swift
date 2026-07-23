@@ -58,6 +58,20 @@ enum MockDataSeeder {
         }
     }
     
+    @MainActor
+    static func deleteAll(modelContext: ModelContext) async {
+        let keywordRepository = KeywordRepository(context: modelContext)
+        let experienceRepository = ExperienceRepository(context: modelContext)
+        let characterRepository = CharacterRepository(context: modelContext)
+        
+        deleteAllExistingData(
+            modelContext: modelContext,
+            keywordRepository: keywordRepository,
+            experienceRepository: experienceRepository,
+            characterRepository: characterRepository
+        )
+    }
+    
 }
 
 // MARK: - 기존 데이터 삭제
