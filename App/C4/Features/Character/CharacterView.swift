@@ -234,7 +234,7 @@ struct CharacterView: View {
                     Button {
                         viewModel.completeCharacterGeneration()
                     } label: {
-                        Text("분석")
+                        Text("생성")
                             .font(
                             Font.custom("SF Pro", size: 13)
                             .weight(.medium)

@@ -23,6 +23,21 @@ struct KeywordEpisodeCard: View {
         }
     }
     
+    @ViewBuilder
+    private func bulletRow(label: String, content: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text("•")
+            Text("\(label): \(content)")
+        }
+        .font(
+            Font.custom("SF Pro", size: 10)
+                .weight(.medium)
+        )
+        .foregroundColor(
+            Color(red: 0.45, green: 0.45, blue: 0.45)
+        )
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
@@ -52,25 +67,35 @@ struct KeywordEpisodeCard: View {
             
             ForEach(displayedEpisodes, id: \.id) { episode in
                 VStack(alignment: .leading, spacing: 10) {
-                    Text(episode.experience.title)
+
+                    Text("\(episode.experience.title): \(episode.title)")
                         .font(
-                            Font.custom("SF Pro", size: 10)
-                                .weight(.semibold)
-                        )
-                        .lineLimit(showsSummary ? 2 : nil)
-                    
-                    Text(showsSummary ? episode.outcome : episode.problemContext + episode.concernPoint + episode.myAction + episode.outcome)
-                    .font(
                         Font.custom("SF Pro", size: 10)
-                            .weight(.medium)
-                    )
-                    .lineLimit(showsSummary ? 2 : nil)
-                    .foregroundColor(
-                        Color(red: 0.45, green: 0.45, blue: 0.45)
-                    )
+                        .weight(.semibold)
+                        )
+                        .foregroundColor(.black)
+                        .lineLimit(showsSummary ? 2 : nil)
+
+                    if showsSummary {
+                        Text(episode.outcome)
+                            .font(
+                                Font.custom("SF Pro", size: 10)
+                                    .weight(.medium)
+                            )
+                            .lineLimit(2)
+                            .foregroundColor(
+                                Color(red: 0.45, green: 0.45, blue: 0.45)
+                            )
+                    } else {
+                        VStack(alignment: .leading, spacing: 6) {
+                            bulletRow(label: "문제 상황", content: episode.problemContext)
+                            bulletRow(label: "고민 포인트", content: episode.concernPoint)
+                            bulletRow(label: "나의 액션", content: episode.myAction)
+                            bulletRow(label: "성과 및 배움", content: episode.outcome)
+                        }
+                    }
                 }
-            }
-        }
+            }        }
     }
 }
 

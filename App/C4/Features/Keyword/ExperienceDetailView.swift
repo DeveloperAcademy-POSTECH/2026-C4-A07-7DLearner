@@ -146,67 +146,27 @@ private extension ExperienceDetailView {
     // 4. 선택된 에피소드 상세 내용 하단 표출 섹션
     @ViewBuilder
     var selectedEpisodeDetailSection: some View {
-        if let selected = selectedKeyword, activeKeywords.contains(where: { $0.id == selected.id }) {
-            let _ = experience.episodes.filter { $0.keyword.id == selected.id }
+        if let selected = selectedKeyword,
+           activeKeywords.contains(where: { $0.id == selected.id }) {
             
+            let filteredEpisodes = experience.episodes.filter {
+                $0.keyword.id == selected.id
+            }
+
             VStack(alignment: .leading, spacing: 0) {
                 Divider()
                     .padding(.vertical, 30)
-                
-                selectedEpisodeContent(selected: selected)
+
+                KeywordEpisodeCard(
+                    keyword: selected,
+                    episodes: filteredEpisodes,
+                    episodeLimit: nil,
+                    showsSummary: false
+                )
             }
         }
     }
     
-    func selectedEpisodeContent(selected: Keyword) -> some View {
-        let filteredEpisodes = experience.episodes.filter { $0.keyword.id == selected.id }
-        
-        return VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 6) {
-                Image(systemName: "tag")
-                    .font(.system(size: 10))
-                    .foregroundStyle(.blue)
-                    .padding(4)
-                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.blue.opacity(0.25)))
-                
-                Text(selected.name)
-                    .font(Font.custom("SF Pro", size: 14).weight(.semibold))
-                
-                Text("\(filteredEpisodes.count)")
-                    .font(.system(size: 10))
-                    .frame(width: 18, height: 18)
-                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.black.opacity(0.1)))
-            }
-            
-            ForEach(filteredEpisodes) { episode in
-                episodeBullets(episode)
-            }
-        }
-    }
-    
-    func episodeBullets(_ episode: Episode) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("\(episode.experience.title): \(episode.title)")
-                .font(.body.weight(.bold))
-                .foregroundColor(.black)
-            
-            bulletRow(label: "문제 상황", content: episode.problemContext)
-            bulletRow(label: "고민 포인트", content: episode.concernPoint)
-            bulletRow(label: "나의 액션", content: episode.myAction)
-            bulletRow(label: "성과 및 배움", content: episode.outcome)
-        }
-        .padding(.top, 4)
-    }
-    
-    func bulletRow(label: String, content: String) -> some View {
-        HStack(alignment: .top, spacing: 4) {
-            Text("•")
-            Text("\(label):").fontWeight(.semibold)
-            Text(content)
-        }
-        .font(.callout)
-        .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
-    }
 }
 
 // MARK: - 보조 디자인 컴포넌트들
