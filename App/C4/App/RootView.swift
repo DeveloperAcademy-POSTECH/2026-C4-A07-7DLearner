@@ -14,6 +14,7 @@ struct RootView: View {
     
     @Query private var characters: [Character]
     @Query private var keywords: [Keyword]
+    @Query private var offices: [Office]
     
     @State private var selection: SidebarItem? = .keyword
     
@@ -36,7 +37,7 @@ private extension RootView {
                 SidebarStatsWidget(
                     characterCount: characters.count,
                     keywordCount: keywords.count,
-                    officeCount: 0,
+                    officeCount: offices.count,
                     draftCount: 0
                 )
             }
@@ -85,7 +86,7 @@ private extension RootView {
         case .character:
             CharacterView(viewModel: CharacterViewModel(modelContext: modelContext))
         case .office:
-            Text("오피스 화면")
+            OfficeView(modelContext: modelContext)
         case .draft:
             Text("임시저장 화면")
         case .trash:
