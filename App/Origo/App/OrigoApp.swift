@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct C4App: App {
+struct Origo: App {
     
     // MARK: SwiftData Container 생성
     var container: ModelContainer = {
@@ -35,6 +35,7 @@ struct C4App: App {
         Group {
             WindowGroup {
                 RootView()
+                    .preferredColorScheme(.light)
             }
             
             Settings {
