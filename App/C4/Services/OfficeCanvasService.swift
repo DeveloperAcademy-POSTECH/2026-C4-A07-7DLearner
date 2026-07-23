@@ -135,7 +135,7 @@ private extension WanderingAvatar {
 
 #Preview {
     let container = try! ModelContainer(
-        for: Attachment.self, Character.self, Episode.self, Experience.self, Keyword.self,
+        for: Attachment.self, Character.self, Episode.self, Experience.self, Keyword.self, Office.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
     let context = container.mainContext
