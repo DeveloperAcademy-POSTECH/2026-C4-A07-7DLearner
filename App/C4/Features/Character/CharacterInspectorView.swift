@@ -261,9 +261,19 @@ private struct CharacterDetailView: View {
             
             VStack(alignment: .leading, spacing: 28) {
                 HStack(alignment: .top, spacing: 10) {
-                    RoundedRectangle(cornerRadius: 7)
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(width: 52, height: 57)
+                    ZStack {
+                        Image(character.bodyAssetName)
+                            .resizable()
+                            .scaledToFit()
+                        Image(character.headAssetName)
+                            .resizable()
+                            .scaledToFit()
+                    }
+                    .frame(width: 52, height: 57)
+                    
+        //            RoundedRectangle(cornerRadius: 7)
+        //                .fill(Color.gray.opacity(0.2))
+        //                .frame(width: 52, height: 57)
                     
                     VStack(alignment:.leading, spacing: 12){
                         Text(character.title)
