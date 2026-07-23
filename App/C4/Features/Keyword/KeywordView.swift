@@ -14,9 +14,12 @@ struct KeywordView: View {
     // MARK: ViewModel
     @State private var viewModel: KeywordViewModel
     @Query private var experiences: [Experience]
-
+    @Environment(\.modelContext) private var modelContext
+    
+    @State private var isDeleteConfirmationPresented = false
+    
     let selectedColor = Color("selectedColor")
-
+    
     init(modelContext: ModelContext) {
         _viewModel = State(initialValue: KeywordViewModel(modelContext: modelContext))
     }
@@ -31,23 +34,18 @@ struct KeywordView: View {
             }
         }
         .navigationTitle("키워드")
-
+        
         // 상태 기반 통합 툴바
         .toolbar {
             keywordToolbar
         }
         // MARK: - Inspector
         .inspector(isPresented: Binding(
-            get: { viewModel.isInspectorPresented },
-            set: { isPresented in
-                if !isPresented {
-                    viewModel.currentInspectorScreen = nil
-                }
-            }
+            get: { true },
+            set: { _ in }
         )) {
             Group {
                 switch viewModel.currentInspectorScreen {
-
                 case .empty:
                     KeywordEmptyView(viewModel: viewModel)
                 case .create:
@@ -73,11 +71,48 @@ struct KeywordView: View {
                     case nil:
                         Text("선택된 항목이 없습니다.")
                     }
-                case nil:
-                    KeywordEmptyView(viewModel: viewModel)
                 }
             }
-            .inspectorColumnWidth(min: 350, ideal: 420, max: 600)
+            .inspectorColumnWidth(min: 600, ideal: 600, max: 700)
+        }
+        .confirmationDialog(
+            "선택한 항목을 삭제하시겠습니까?",
+            isPresented: $isDeleteConfirmationPresented,
+            titleVisibility: .visible
+        ) {
+            Button("삭제", role: .destructive) {
+                deleteSelectedSelection()
+            }
+            Button("취소", role: .cancel) { }
+        } message: {
+            Text("삭제한 항목은 복구할 수 없습니다.")
+        }
+    }
+    
+    // 선택된 키워드 또는 경험 삭제
+    private func deleteSelectedSelection() {
+        if let selection = viewModel.viewSelection {
+            switch selection {
+            case .keyword(let keyword):
+                for episode in keyword.episodes {
+                    modelContext.delete(episode)
+                }
+                modelContext.delete(keyword)
+                
+            case .experience(let experience):
+                modelContext.delete(experience)
+            }
+            
+            do {
+                try modelContext.save()
+                viewModel.fetchKeywords()
+            } catch {
+                print("삭제 저장 실패: \(error)")
+            }
+            
+            // 삭제 후 인스펙터를 비우거나 초기화면으로 복귀
+            viewModel.viewSelection = nil
+            viewModel.currentInspectorScreen = .empty
         }
     }
     
@@ -93,7 +128,7 @@ struct KeywordView: View {
     // MARK: - 리스트 화면
     private var contentListView: some View {
         VStack(spacing: 0) {
-            // 상단 탭 (ViewModel의 changeTab과 연동)
+            // 상단 탭
             HStack(spacing: 0) {
                 Button(action: {
                     viewModel.changeTab(to: "키워드")
@@ -127,27 +162,19 @@ struct KeywordView: View {
             // 키워드 및 경험 리스트 분기 처리
             if viewModel.selectedTab == "키워드" {
                 List(viewModel.keywords, id: \.id, selection: keywordSelection) { keyword in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(keyword.name)
-                            .font(Font.custom("SF Pro", size: 15).weight(.semibold))
-                            .foregroundColor(.black)
-                        Text("에피소드 \(keyword.episodes.count)개")
-                            .font(Font.custom("SF Pro", size: 12))
-                            .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.45))
-                    }
-                    .padding(.vertical, 8)
+                    row(title: keyword.name,
+                        subtitle: "에피소드 \(keyword.episodes.count)개")
                     .tag(keyword)
                 }
                 .listStyle(.plain)
             } else {
-                // 💡 진짜 경험 리스트 (경험 명 + 아래에 바짝 붙은 키워드 태그들)
                 List(experiences, id: \.id, selection: experienceSelection) { experience in
                     VStack(alignment: .leading, spacing: 6) {
                         Text(experience.title)
-                            .font(Font.custom("SF Pro", size: 15).weight(.semibold))
+                            .font(Font.custom("SF Pro", size: 13).weight(.semibold))
                             .foregroundColor(.black)
                         
-                        HStack(spacing: 2) {
+                        HStack(spacing: 6) {
                             ForEach(experience.keywords, id: \.id) { keyword in
                                 KeywordTag(text: keyword.name, style: .selected)
                             }
@@ -159,6 +186,20 @@ struct KeywordView: View {
                 .listStyle(.plain)
             }
         }
+    }
+    
+    // Row 컴포넌트
+    private func row(title: String, subtitle: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.body.weight(.semibold))
+                .lineLimit(1)
+            Text(subtitle)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+        .padding(.vertical, 4)
     }
     
     // 리스트 선택 바인딩 헬퍼
@@ -196,121 +237,85 @@ struct KeywordView: View {
     @ToolbarContentBuilder
     private var keywordToolbar: some ToolbarContent {
         switch viewModel.currentInspectorScreen {
-        case .create:
-            ToolbarItem(placement: .navigation) {
+            
+        case .empty:
+            ToolbarItem(placement: .primaryAction) {
                 Button(action: {
-                    viewModel.currentInspectorScreen = nil
+                    viewModel.startKeywordCreation()
                 }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 14))
-                        .foregroundColor(.black)
+                    Text("+ 새 키워드")
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.glass) // 캐릭터 창 스타일 차용
             }
             
-            ToolbarItemGroup(placement: .primaryAction) {
+        case .create:
+            ToolbarItem(placement: .cancellationAction) {
+                Button(action: {
+                    viewModel.currentInspectorScreen = .empty
+                }) {
+                    Image(systemName: "xmark")
+                }
+                .buttonStyle(.glass)
+            }
+            
+            ToolbarSpacer()
+            
+            ToolbarItem(placement: .automatic) {
                 Button(action: {
                     // 임시저장 액션
                 }) {
                     Text("임시저장")
                         .font(Font.custom("SF Pro", size: 13).weight(.medium))
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 14)
-                        .frame(height: 28)
-                        .overlay(
-                            Capsule().stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                        )
                 }
-                .buttonStyle(.plain)
-                
+                .buttonStyle(.glass)
+            }
+            
+            ToolbarItem(placement: .primaryAction) {
                 Button(action: {
                     viewModel.startAnalysis()
                 }) {
                     Text("분석")
                         .font(Font.custom("SF Pro", size: 13).weight(.medium))
                         .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .frame(height: 28)
-                        .background(Color(red: 0.0, green: 0.48, blue: 1.0))
-                        .clipShape(Capsule())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.glassProminent)
                 .disabled(!viewModel.isDraftReadyToAnalyze)
             }
             
-        case .detail:
-            ToolbarItem(placement: .cancellationAction) {
+        case .loading:
+            // 로딩 창에서는 툴바 숨김
+            ToolbarItem(placement: .automatic) { }
+            
+        case .draft, .detail: // 초안(draft) 및 디테일 창
+            ToolbarItem(placement: .destructiveAction) {
+                Button {
+                    isDeleteConfirmationPresented = true
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(.glass)
+            }
+            
+            ToolbarSpacer()
+            
+            ToolbarItem(placement: .automatic) {
                 Button {
                     viewModel.startKeywordCreation()
                 } label: {
-                    Image(systemName: "plus")
+                    Text("+ 새 키워드")
                 }
+                .buttonStyle(.glass)
             }
             
-        default:
-            if viewModel.keywords.isEmpty && experiences.isEmpty {
-                ToolbarItem(placement: .primaryAction) {
-                    Button(action: {
-                        viewModel.startKeywordCreation()
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus")
-                            Text("새 키워드")
-                        }
-                        .font(Font.custom("SF Pro", size: 14).weight(.medium))
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 10)
-                        .frame(height: 28)
-                    }
-                    .buttonStyle(.plain)
-                    .clipShape(Capsule())
-                    .fixedSize()
+            ToolbarSpacer()
+            
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    // TODO: 편집 액션 연동 (어디로 가서 편집할지.. 고민되어... 걍 둔다.. 허허)
+                } label: {
+                    Text("편집")
                 }
-            } else {
-
-                ToolbarItem(placement: .navigation) {
-                    Button(action: {
-                        // 휴지통 액션
-                    }) {
-                        Image(systemName: "trash")
-                            .font(.system(size: 14))
-                            .frame(width: 36, height: 36)
-                    }
-                    .buttonStyle(.plain)
-                    .clipShape(Circle())
-                    .fixedSize()
-                }
-
-                ToolbarItemGroup(placement: .primaryAction) {
-                    Button(action: {
-                        viewModel.startKeywordCreation()
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus")
-                            Text("새 키워드")
-                        }
-                        .font(Font.custom("SF Pro", size: 14).weight(.medium))
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 10)
-                        .frame(height: 28)
-                    }
-                    .buttonStyle(.plain)
-                    .background(Color.gray.opacity(0.12))
-                    .clipShape(Capsule())
-                    .fixedSize()
-
-                    Spacer()
-                        .frame(width: 120)
-
-                    Button(action: {
-                        // 검색 액션
-                    }) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 13))
-                            .foregroundColor(.black)
-                            .frame(width: 28, height: 28)
-                    }
-                }
+                .buttonStyle(.glass)
             }
         }
     }

@@ -55,11 +55,14 @@ final class KeywordViewModel {
     var viewSelection: KeywordViewSelection?
     var allExperiences: [Experience] = []
     
+    // MARK: - Inspector State
+        var currentInspectorScreen: InspectorScreen = .empty
+    
     // 탭 변경 및 선택 초기화 함수
     func changeTab(to tab: String) {
         self.selectedTab = tab
         self.viewSelection = nil
-        self.currentInspectorScreen = nil
+        self.currentInspectorScreen = .empty
         if tab == "경험" {
             fetchAllExperiences()
         }
@@ -73,12 +76,6 @@ final class KeywordViewModel {
         } catch {
             print("Experience 조회 실패: \(error)")
         }
-    }
-    
-    // MARK: Inspector State
-    var currentInspectorScreen: InspectorScreen?
-    var isInspectorPresented: Bool {
-        currentInspectorScreen != nil
     }
     
     // MARK: Draft State (생성 폼 입력값)
@@ -108,7 +105,6 @@ final class KeywordViewModel {
     }
 
     // MARK: - Functions
-
     // 저장된 전체 키워드 조회
     func fetchKeywords() {
         do {
