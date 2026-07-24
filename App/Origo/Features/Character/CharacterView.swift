@@ -12,9 +12,13 @@ struct CharacterView: View {
     
     @State private var viewModel: CharacterViewModel
     @State private var isDeleteConfirmationPresented = false
+    @State private var isInfoPopoverPresented = false
     @Query private var characters: [Character]
         
-    private let columns = [GridItem(.adaptive(minimum: 224), spacing: 10)]
+    private let columns = [
+        GridItem(.fixed(228), spacing: 24),
+        GridItem(.fixed(228), spacing: 24)
+    ]
     
     init(viewModel: CharacterViewModel) {
         self.viewModel = viewModel
@@ -77,13 +81,62 @@ struct CharacterView: View {
     
     // MARK: - CharacterList
     private var CharacterList: some View {
-        VStack{
+        VStack (alignment: .leading) {
+            
+            VStack (alignment: .leading, spacing: 3){
+                
+                HStack (alignment: .firstTextBaseline) {
+                    Text("캐릭터")
+                        .font(
+                            Font.custom("SF Pro", size: 17)
+                                .weight(.semibold)
+                        )
+                        .foregroundColor(.black)
+                    
+                    Button {
+                        isInfoPopoverPresented = true
+                    } label: {
+                         Image(systemName: "info.circle")
+                            .font(.system(size: 14, weight: .semibold))
+                            .offset(y: -1)
+                    }
+                    .buttonStyle(.plain)
+                    .popover(isPresented: $isInfoPopoverPresented,arrowEdge: .top) {
+                        InfoPopover(
+                            message1: "관련 키워드와 경험을 활용해, 특정 분야나 역량을 보여주는 ‘캐릭터'를 만들어요.",
+                            message2: "‘새 캐릭터’를 눌러 보여주고 싶은 키워드를 고른 뒤, 캐릭터를 만들어요.",
+                            message3: "만든 캐릭터를 선택해 연결된 키워드와 에피소드를 한눈에 확인할 수 있어요.\n또한, 목적에 맞는 캐릭터들을 오피스에 모을 수 있어요.")
+                    }
+                    
+                    
+                }
+                
+
+                Text("CV와 포트폴리오를 위한 캐릭터를 만들어보세요!")
+                  .font(Font.custom("SF Pro", size: 10))
+                  .foregroundColor(Constants.ndTextColor)
+                  .frame(width: 252, height: 13, alignment: .leading)
+            }
+            .padding(.top, 30)
+            .padding(.horizontal, 30)
+           
+            
+            
+            
             if characters.isEmpty {
                 Text("아직 생성된 캐릭터가 없습니다. \n+ 버튼을 눌러 새로운 캐릭터를 만들어 보세요")
             }
             else {
                 ScrollView {
-                    LazyVGrid(columns: columns) {
+                    LazyVGrid(
+
+                        columns: columns,
+
+                        alignment: .leading,
+
+                        spacing: 16
+
+                    )  {
                         ForEach(characters, id: \.id){ character in
                             
                             Group {
@@ -99,9 +152,12 @@ struct CharacterView: View {
                         }
                     }
                 }
-                .padding()
+                .padding(.horizontal, 30)
+                .padding(.top, 16)
+                .padding(.bottom, 16)
             }
         }
+        
     }
     
     
