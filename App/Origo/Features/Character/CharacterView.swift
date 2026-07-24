@@ -14,7 +14,7 @@ struct CharacterView: View {
     @State private var isDeleteConfirmationPresented = false
     @State private var isInfoPopoverPresented = false
     @Query private var characters: [Character]
-        
+    
     private let columns = [
         GridItem(.fixed(228), spacing: 24),
         GridItem(.fixed(228), spacing: 24)
@@ -27,40 +27,33 @@ struct CharacterView: View {
     var body: some View {
         
         Group {
-                switch viewModel.currentInspectorScreen {
+            switch viewModel.currentInspectorScreen {
+                
+            case .create:
+                if viewModel.draftKeywords.isEmpty {
+                    CharacterList
                     
-                case .create:
+                } else {
+                    SelectedKeywordView(viewModel: viewModel)
+                }
+                
+            case.detail:
+                if viewModel.isEditing == false {
+                    CharacterList
+                } else {
                     if viewModel.draftKeywords.isEmpty {
                         CharacterList
-                       
+                        
                     } else {
                         SelectedKeywordView(viewModel: viewModel)
                     }
-                    
-                case.detail:
-                    if viewModel.isEditing == false {
-                        CharacterList
-                    } else {
-                        if viewModel.draftKeywords.isEmpty {
-                            CharacterList
-                           
-                        } else {
-                            SelectedKeywordView(viewModel: viewModel)
-                        }
-                    }
-                
-                default:
-                    CharacterList
                 }
+                
+            default:
+                CharacterList
             }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .inspector(isPresented: Binding(
-            get: { true },
-            set: { _ in }
-        )
-        ){
-            CharacterInspectorView(viewModel: viewModel)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .toolbar {
             characterToolbar
         }
@@ -77,6 +70,12 @@ struct CharacterView: View {
             } message: {
                 Text("삭제한 캐릭터는 복구할 수 없습니다.")
             }
+    }
+    
+    // MARK: - Inspector
+    @ViewBuilder
+    static func inspectorContent(viewModel: CharacterViewModel) -> some View {
+        CharacterInspectorView(viewModel: viewModel)
     }
     
     // MARK: - CharacterList
@@ -146,9 +145,9 @@ struct CharacterView: View {
                                     CharacterCard(character: character, keywordLimit: 2, isSelected: false)
                                 }
                             }
-                                .onTapGesture {
-                                    viewModel.selectCharacter(character)
-                                }
+                            .onTapGesture {
+                                viewModel.selectCharacter(character)
+                            }
                         }
                     }
                 }
@@ -168,42 +167,42 @@ struct CharacterView: View {
         
         var body: some View {
             
-                VStack(alignment: .leading, spacing: 10) {
-                    SectionHeader(title: "선택된 키워드", descriptions: "키워드별 에피소드를 확인해보세요!")
+            VStack(alignment: .leading, spacing: 10) {
+                SectionHeader(title: "선택된 키워드", descriptions: "키워드별 에피소드를 확인해보세요!")
+                
+                ScrollView {
                     
-                    ScrollView {
-
-                        VStack(alignment: .leading) {
-                            ForEach(viewModel.draftKeywords, id: \.id) { keyword in
-                                
-                                    KeywordEpisodeCard(
-                                        keyword: keyword,
-                                        episodes: keyword.episodes,
-                                        episodeLimit: nil,
-                                        showsSummary: false
+                    VStack(alignment: .leading) {
+                        ForEach(viewModel.draftKeywords, id: \.id) { keyword in
+                            
+                            KeywordEpisodeCard(
+                                keyword: keyword,
+                                episodes: keyword.episodes,
+                                episodeLimit: nil,
+                                showsSummary: false
+                            )
+                            .padding(20)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.white)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .inset(by: 0.2)
+                                    .stroke(
+                                        Color(red: 0.53, green: 0.53, blue: 0.53),
+                                        lineWidth: 0.4
                                     )
-                                    .padding(20)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .fill(Color.white)
-                                    )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .inset(by: 0.2)
-                                            .stroke(
-                                                Color(red: 0.53, green: 0.53, blue: 0.53),
-                                                lineWidth: 0.4
-                                            )
-                                    )
-                                    .contentShape(Rectangle())
+                            )
+                            .contentShape(Rectangle())
                         }
-                        }
-                        
                     }
+                    
                 }
-                .padding(30)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            }
+            .padding(30)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }
     
@@ -231,11 +230,11 @@ struct CharacterView: View {
                     } label: {
                         Text("취소")
                             .font(
-                            Font.custom("SF Pro", size: 13)
-                            .weight(.medium)
+                                Font.custom("SF Pro", size: 13)
+                                    .weight(.medium)
                             )
                             .foregroundColor(Constants.LabelsVibrantUsePlusLighterDarkerPrimary)
-                            
+                        
                     }
                     .buttonStyle(.glass)
                 }
@@ -248,11 +247,11 @@ struct CharacterView: View {
                     } label: {
                         Text("저장")
                             .font(
-                            Font.custom("SF Pro", size: 13)
-                            .weight(.medium)
+                                Font.custom("SF Pro", size: 13)
+                                    .weight(.medium)
                             )
                             .foregroundColor(Constants.LabelsWhite)
-                            
+                        
                     }
                     .buttonStyle(.glassProminent)
                     .disabled(!viewModel.isDraftReadyToSave)
@@ -276,15 +275,15 @@ struct CharacterView: View {
                     } label: {
                         Text("임시저장")
                             .font(
-                            Font.custom("SF Pro", size: 13)
-                            .weight(.medium)
+                                Font.custom("SF Pro", size: 13)
+                                    .weight(.medium)
                             )
                             .foregroundColor(Constants.LabelsVibrantUsePlusLighterDarkerPrimary)
                     }
                     .buttonStyle(.glass)
                 }
                 
-
+                
                 
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -292,11 +291,11 @@ struct CharacterView: View {
                     } label: {
                         Text("생성")
                             .font(
-                            Font.custom("SF Pro", size: 13)
-                            .weight(.medium)
+                                Font.custom("SF Pro", size: 13)
+                                    .weight(.medium)
                             )
                             .foregroundColor(Constants.LabelsWhite)
-                            
+                        
                     }
                     .buttonStyle(.glassProminent)
                     .disabled(!viewModel.isDraftReadyToSave)
@@ -306,23 +305,23 @@ struct CharacterView: View {
         case .loading:
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                 //
+                    //
                 } label: {
-                   //
+                    //
                 }
             }
         case .draft:
             ToolbarItem(placement: .automatic) {
             }
-                        
+            
         case .detail:
-                ToolbarItem(placement: .destructiveAction) {
-                    Button {
-                        isDeleteConfirmationPresented = true
-                    } label: {
-                        Image(systemName: "trash")
-                    }
+            ToolbarItem(placement: .destructiveAction) {
+                Button {
+                    isDeleteConfirmationPresented = true
+                } label: {
+                    Image(systemName: "trash")
                 }
+            }
             
             
             ToolbarSpacer()
@@ -360,36 +359,36 @@ struct CharacterView: View {
 //        Episode.self,
 //        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
 //    )
-//    
+//
 //    let keyword1 = Keyword(name: "협업")
 //    let keyword2 = Keyword(name: "회복탄력성")
 //    let keyword3 = Keyword(name: "책임감")
-//    
+//
 //    let character1 = Character(
 //        title: "기획자",
 //        characterStatement: "사용자 중심으로 사고한다.",
 //        keywords: [keyword1, keyword2, keyword3]
 //    )
-//    
+//
 //    let character2 = Character(
 //        title: "문제 해결사",
 //        characterStatement: "문제를 끝까지 해결한다.",
 //        keywords: [keyword2, keyword3]
 //    )
-//    
+//
 //    container.mainContext.insert(keyword1)
 //    container.mainContext.insert(keyword2)
 //    container.mainContext.insert(keyword3)
-//    
+//
 //    container.mainContext.insert(character1)
 //    container.mainContext.insert(character2)
-//    
+//
 //    try! container.mainContext.save()
-//    
+//
 //    let viewModel = CharacterViewModel(
 //        modelContext: container.mainContext
 //    )
-//    
+//
 //    return CharacterView(viewModel: viewModel)
 //        .modelContainer(container)
 //}

@@ -22,7 +22,6 @@ struct CharacterInspectorView: View {
             case .detail: CharacterDetailView(viewModel: viewModel)
             }
         }
-        .inspectorColumnWidth(min: 600, ideal: 600, max: 700)
     }
 }
 

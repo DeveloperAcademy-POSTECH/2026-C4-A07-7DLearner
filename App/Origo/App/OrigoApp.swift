@@ -34,9 +34,11 @@ struct Origo: App {
     var body: some Scene {
         Group {
             WindowGroup {
-                RootView()
+                RootView(modelContext: container.mainContext)
                     .preferredColorScheme(.light)
             }
+            .defaultSize(width: 1400, height: 720)
+            .windowResizability(.contentMinSize)
             
             Settings {
                 TabView {

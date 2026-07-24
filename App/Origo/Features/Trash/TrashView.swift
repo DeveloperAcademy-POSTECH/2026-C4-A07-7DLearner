@@ -16,8 +16,8 @@ struct TrashView: View {
     
     @State private var viewModel: TrashViewModel
     
-    init(modelContext: ModelContext) {
-        _viewModel = State(initialValue: TrashViewModel(modelContext: modelContext))
+    init(viewModel: TrashViewModel) {
+        _viewModel = State(initialValue: viewModel)
     }
     
     var body: some View {
@@ -27,15 +27,6 @@ struct TrashView: View {
             itemList
         }
         .navigationTitle("휴지통")
-        .inspector(isPresented: Binding(
-            get: { viewModel.isInspectorPresented },
-            set: { isPresented in
-                if !isPresented { viewModel.currentInspectorScreen = nil }
-            }
-        )) {
-            inspectorContent
-                .inspectorColumnWidth(min: 350, ideal: 450, max: 700)
-        }
         .toolbar {
             trashToolbar
         }
@@ -190,10 +181,10 @@ private extension TrashView {
 }
 
 // MARK: - 인스펙터
-private extension TrashView {
+extension TrashView {
     
     @ViewBuilder
-    var inspectorContent: some View {
+    static func inspectorContent(viewModel: TrashViewModel) -> some View{
         switch viewModel.selection {
         case .keyword(let keyword):
             keywordDetail(keyword)
@@ -208,8 +199,12 @@ private extension TrashView {
         }
     }
     
+}
+
+private extension TrashView {
+    
     // MARK: 키워드 상세
-    func keywordDetail(_ keyword: Keyword) -> some View {
+    static func keywordDetail(_ keyword: Keyword) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 SectionHeader(title: keyword.name, descriptions: "이 키워드에 연결된 에피소드예요")
@@ -226,7 +221,7 @@ private extension TrashView {
     }
     
     // MARK: 캐릭터 상세
-    func characterDetail(_ character: Character) -> some View {
+    static func characterDetail(_ character: Character) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 CharacterCard(character: character, keywordLimit: nil, isSelected: false)
@@ -248,7 +243,7 @@ private extension TrashView {
     }
     
     // MARK: 경험 상세
-    func experienceDetail(_ experience: Experience) -> some View {
+    static func experienceDetail(_ experience: Experience) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Text("개요")
@@ -274,7 +269,7 @@ private extension TrashView {
     }
     
     // 개요 밑 경험 명 기간 등 템플릿
-    func overviewSection(_ experience: Experience) -> some View {
+    static func overviewSection(_ experience: Experience) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("경험 명").font(.callout.weight(.semibold))
@@ -293,7 +288,7 @@ private extension TrashView {
     }
     
     // read only 필드 박스 ----> 스페로가 만들어둔 커스텀텍스트필드는 readonly 없었음.....
-    func fieldBox(_ text: String) -> some View {
+    static func fieldBox(_ text: String) -> some View {
         Text(text)
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
@@ -305,7 +300,7 @@ private extension TrashView {
     }
     
     // 에피소드 상세
-    func episodeBullets(_ episode: Episode) -> some View {
+    static func episodeBullets(_ episode: Episode) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(episode.title)
                 .font(.callout.weight(.bold))
@@ -317,7 +312,7 @@ private extension TrashView {
         }
     }
     
-    func bulletRow(label: String, content: String) -> some View {
+    static func bulletRow(label: String, content: String) -> some View {
         HStack(alignment: .top, spacing: 4) {
             Text("•")
             Text("\(label):").fontWeight(.semibold)
@@ -329,10 +324,11 @@ private extension TrashView {
 }
 
 #Preview {
-    TrashView(modelContext: ModelContext(
-        try! ModelContainer(
-            for: Attachment.self, Character.self, Episode.self, Experience.self, Keyword.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-    ))
+    let container = try! ModelContainer(
+        for: Attachment.self, Character.self, Episode.self, Experience.self, Keyword.self, Office.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    
+    return TrashView(viewModel: TrashViewModel(modelContext: container.mainContext))
+        .modelContainer(container)
 }

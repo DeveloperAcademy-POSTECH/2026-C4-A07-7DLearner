@@ -15,8 +15,8 @@ struct OfficeView: View {
     
     @State private var viewModel: OfficeViewModel
     
-    init(modelContext: ModelContext) {
-        _viewModel = State(initialValue: OfficeViewModel(modelContext: modelContext))
+    init(viewModel: OfficeViewModel) {
+        _viewModel = State(initialValue: viewModel)
     }
     
     var body: some View {
@@ -27,10 +27,6 @@ struct OfficeView: View {
         .padding(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .navigationTitle("오피스")
-        .inspector(isPresented: .constant(true)) {
-            inspectorContent
-                .inspectorColumnWidth(min: 350, ideal: 450, max: 600)
-        }
         .toolbar {
             officeToolbar
         }
@@ -143,15 +139,17 @@ private extension OfficeView {
 }
 
 // MARK: - 인스펙터
-private extension OfficeView {
+extension OfficeView {
     
     @ViewBuilder
-    var inspectorContent: some View {
+    static func inspectorContent(viewModel: OfficeViewModel, characters: [Character]) -> some View {
         switch viewModel.currentInspectorScreen {
         case .create:
             OfficeCreateView(viewModel: viewModel, allCharacters: characters)
         case .detail:
-            characterDetail
+            if let character = viewModel.selectedCharacter {
+                characterDetail(character)
+            }
         default:
             Text("오피스에 돌아다니는 캐릭터를 눌러보세요~^^")
                 .foregroundStyle(.secondary)
@@ -159,26 +157,28 @@ private extension OfficeView {
         }
     }
     
+}
+
+private extension OfficeView {
+    
     // 캐릭터 상세 뷰
     @ViewBuilder
-    var characterDetail: some View {
-        if let character = viewModel.selectedCharacter {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    CharacterCard(character: character, keywordLimit: nil, isSelected: false)
-                    
-                    SectionHeader(title: "키워드", descriptions: "해당 캐릭터를 구성하는 키워드와 에피소드")
-                    
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 232), spacing: 8, alignment: .top)],
-                              alignment: .leading, spacing: 8) {
-                        ForEach(character.keywords, id: \.id) { keyword in
-                            KeywordEpisodeCard(keyword: keyword, episodes: keyword.episodes, episodeLimit: nil, showsSummary: true)
-                        }
+    static func characterDetail(_ character: Character) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                CharacterCard(character: character, keywordLimit: nil, isSelected: false)
+                
+                SectionHeader(title: "키워드", descriptions: "해당 캐릭터를 구성하는 키워드와 에피소드")
+                
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 232), spacing: 8, alignment: .top)],
+                          alignment: .leading, spacing: 8) {
+                    ForEach(character.keywords, id: \.id) { keyword in
+                        KeywordEpisodeCard(keyword: keyword, episodes: keyword.episodes, episodeLimit: nil, showsSummary: true)
                     }
                 }
-                .padding(24)
-                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
+            .padding(24)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
     }
     
@@ -222,10 +222,11 @@ private struct OfficeCreateView: View {
 }
 
 #Preview {
-    OfficeView(modelContext: ModelContext(
-        try! ModelContainer(
-            for: Attachment.self, Character.self, Episode.self, Experience.self, Keyword.self, Office.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-    ))
+    let container = try! ModelContainer(
+        for: Attachment.self, Character.self, Episode.self, Experience.self, Keyword.self, Office.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    
+    return OfficeView(viewModel: OfficeViewModel(modelContext: container.mainContext))
+        .modelContainer(container)
 }
