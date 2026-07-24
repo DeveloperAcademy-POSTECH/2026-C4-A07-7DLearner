@@ -21,8 +21,8 @@ struct KeywordView: View {
     
     let selectedColor = Color("selectedColor")
     
-    init(modelContext: ModelContext) {
-        _viewModel = State(initialValue: KeywordViewModel(modelContext: modelContext))
+    init(viewModel: KeywordViewModel) {
+        _viewModel = State(initialValue: viewModel)
     }
     
     var body: some View {
@@ -74,42 +74,6 @@ struct KeywordView: View {
         .toolbar {
             keywordToolbar
         }
-        // MARK: - Inspector
-        .inspector(isPresented: Binding(
-            get: { true },
-            set: { _ in }
-        )) {
-            Group {
-                switch viewModel.currentInspectorScreen {
-                case .empty:
-                    KeywordEmptyView(viewModel: viewModel)
-                case .create:
-                    KeywordCreateView(viewModel: viewModel)
-                case .loading:
-                    if let experience = viewModel.analysisExperience {
-                        KeywordLoadingView(
-                            experience: experience,
-                            manager: viewModel.episodeGenerationManager,
-                            onComplete: {
-                                viewModel.finishAnalysis()
-                            }
-                        )
-                    }
-                case .draft:
-                    KeywordDraftView(viewModel: viewModel)
-                case .detail:
-                    switch viewModel.viewSelection {
-                    case .keyword(let keyword):
-                        KeywordDetailView(keyword: keyword, episodes: viewModel.episodesForKeyword(keyword: keyword))
-                    case .experience(let experience):
-                        ExperienceDetailView(experience: experience)
-                    case nil:
-                        Text("선택된 항목이 없습니다.")
-                    }
-                }
-            }
-            .inspectorColumnWidth(min: 600, ideal: 600, max: 700)
-        }
         .confirmationDialog(
             "선택한 항목을 삭제하시겠습니까?",
             isPresented: $isDeleteConfirmationPresented,
@@ -121,6 +85,38 @@ struct KeywordView: View {
             Button("취소", role: .cancel) { }
         } message: {
             Text("삭제한 항목은 복구할 수 없습니다.")
+        }
+    }
+    
+    // MARK: - Inspector
+    @ViewBuilder
+    static func inspectorContent(viewModel: KeywordViewModel) -> some View {
+        switch viewModel.currentInspectorScreen {
+        case .empty:
+            KeywordEmptyView(viewModel: viewModel)
+        case .create:
+            KeywordCreateView(viewModel: viewModel)
+        case .loading:
+            if let experience = viewModel.analysisExperience {
+                KeywordLoadingView(
+                    experience: experience,
+                    manager: viewModel.episodeGenerationManager,
+                    onComplete: {
+                        viewModel.finishAnalysis()
+                    }
+                )
+            }
+        case .draft:
+            KeywordDraftView(viewModel: viewModel)
+        case .detail:
+            switch viewModel.viewSelection {
+            case .keyword(let keyword):
+                KeywordDetailView(keyword: keyword, episodes: viewModel.episodesForKeyword(keyword: keyword))
+            case .experience(let experience):
+                ExperienceDetailView(experience: experience)
+            case nil:
+                Text("선택된 항목이 없습니다.")
+            }
         }
     }
     

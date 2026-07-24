@@ -18,12 +18,34 @@ struct RootView: View {
     
     @State private var selection: SidebarItem? = .keyword
     
+    @State private var keywordViewModel: KeywordViewModel
+    @State private var characterViewModel: CharacterViewModel
+    @State private var officeViewModel: OfficeViewModel
+    @State private var trashViewModel: TrashViewModel
+    
+    init(modelContext: ModelContext) {
+        _keywordViewModel = State(initialValue: KeywordViewModel(modelContext: modelContext))
+        _characterViewModel = State(initialValue: CharacterViewModel(modelContext: modelContext))
+        _officeViewModel = State(initialValue: OfficeViewModel(modelContext: modelContext))
+        _trashViewModel = State(initialValue: TrashViewModel(modelContext: modelContext))
+    }
+    
     var body: some View {
         NavigationSplitView {
             sidebar
+                .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 320)
         } detail: {
             detailContent
+                .frame(minWidth: 420, idealWidth: 420, maxWidth: .infinity)
+                .inspector(isPresented: .constant(true)) {
+                    inspectorContent
+                        .inspectorColumnWidth(min: 400, ideal: 500, max: 650)
+                }
         }
+        .frame(
+            minWidth: 1080, idealWidth: 1400, maxWidth: 1920,
+            minHeight: 640, idealHeight: 720, maxHeight: 1200
+        )
     }
 }
 
@@ -82,22 +104,46 @@ private extension RootView {
     var detailContent: some View {
         switch selection {
         case .keyword:
-            KeywordView(modelContext: modelContext)
+            KeywordView(viewModel: keywordViewModel)
         case .character:
-            CharacterView(viewModel: CharacterViewModel(modelContext: modelContext))
+            CharacterView(viewModel: characterViewModel)
         case .office:
-            OfficeView(modelContext: modelContext)
+            OfficeView(viewModel: officeViewModel)
         case .draft:
             Text("임시저장 화면")
         case .trash:
-            TrashView(modelContext: modelContext)
+            TrashView(viewModel: trashViewModel)
         case .none:
             Text("사이드바에서 항목을 선택하세요")
         }
     }
 }
 
+// MARK: - 인스펙터
+private extension RootView {
+    @ViewBuilder
+    var inspectorContent: some View {
+        switch selection {
+        case .keyword:
+            KeywordView.inspectorContent(viewModel: keywordViewModel)
+        case .character:
+            CharacterView.inspectorContent(viewModel: characterViewModel)
+        case .office:
+            OfficeView.inspectorContent(viewModel: officeViewModel, characters: characters)
+        case .trash:
+            TrashView.inspectorContent(viewModel: trashViewModel)
+        case .draft, nil:
+            Text("항목을 선택하세요")
+        }
+    }
+}
+
 #Preview {
-    RootView()
-        .modelContainer(for: [Character.self, Experience.self, Keyword.self, Attachment.self, Episode.self], inMemory: true)
+    let container = try! ModelContainer(
+        for: Character.self, Experience.self, Keyword.self, Attachment.self, Episode.self, Office.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    
+    return RootView(modelContext: container.mainContext)
+        .modelContainer(container)
 }
