@@ -11,6 +11,7 @@ import Foundation
 
 struct KeywordView: View {
     
+    @State private var isInfoPopoverPresented: Bool = false
     // MARK: ViewModel
     @State private var viewModel: KeywordViewModel
     @Query private var experiences: [Experience]
@@ -26,11 +27,45 @@ struct KeywordView: View {
     
     var body: some View {
         // MARK: - 리스트 영역
-        VStack(spacing: 0) {
+        VStack(alignment: .leading, spacing: 0) {
+            
+            VStack(alignment: .leading)  {
+                HStack (alignment: .firstTextBaseline) {
+                    Text("키워드")
+                        .font(
+                            Font.custom("SF Pro", size: 17)
+                                .weight(.semibold)
+                        )
+                        .foregroundColor(.black)
+                    
+                    Button {
+                        isInfoPopoverPresented = true
+                    } label: {
+                         Image(systemName: "info.circle")
+                            .font(.system(size: 14, weight: .semibold))
+                            .offset(y: -1)
+                    }
+                    .buttonStyle(.plain)
+                    .popover(isPresented: $isInfoPopoverPresented,arrowEdge: .top) {
+                        InfoPopover(
+                            message1: "경험 속에서 드러난 나의 강점과 역할을 키워드와 에피소드로 정리해요.",
+                            message2: "‘새 키워드’를 눌러 경험의 이름과 기간, 기억나는 내용과 관련 자료를 입력해요.",
+                            message3: "만든 키워드를 골라 특정 분야나 역량을 보여주는 나만의 캐릭터를 만들 수 있어요.")
+                    }
+                    
+                    
+                }
+            }
+            .padding(.top, 30)
+            .padding(.horizontal, 30)
+ 
             if viewModel.keywords.isEmpty && experiences.isEmpty {
                 emptyStateView
             } else {
                 contentListView
+                    .padding(.horizontal, 30)
+                    .padding(.top, 16)
+                    .padding(.bottom, 16)
             }
         }
         .navigationTitle("키워드")

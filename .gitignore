@@ -118,3 +118,4 @@ Backups.backupdb
 MobileBackups.trash
 tmbootpicker.efi
 **/Secrets.swift
+App/Origo/Services/Claude/Secrets.swift
