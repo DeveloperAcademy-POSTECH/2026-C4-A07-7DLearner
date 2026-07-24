@@ -243,7 +243,16 @@ struct KeywordCreateView: View {
                 .padding(.bottom, 17)
                 .fileImporter(
                     isPresented: $isPresentingFileImporter,
-                    allowedContentTypes: [.plainText, .pdf, .commaSeparatedText, .data], // 허용할 확장자
+                    allowedContentTypes: [
+                        .plainText,                                 // txt
+                        .commaSeparatedText,                        // csv
+                        .pdf,                                       // pdf
+                        .rtf,                                       // rtf
+                        .image,                                     // png, jpg, heic 등 이미지 (OCR)
+                        UTType(filenameExtension: "md") ?? .plainText,   // md
+                        UTType(filenameExtension: "docx") ?? .data,      // docx
+                        UTType(filenameExtension: "doc") ?? .data        // doc
+                    ], // 허용할 확장자
                     allowsMultipleSelection: false
                 ) { result in
                     handleFileImport(result)
